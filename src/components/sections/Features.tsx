@@ -1,10 +1,9 @@
+
 import {
-  Zap,
-  Shield,
-  Smartphone,
-  Code,
-  PaintBucket,
-  LayoutGrid,
+  Leaf,
+  UtensilsCrossed,
+  Truck,
+  Heart,
 } from "lucide-react";
 
 interface FeatureCardProps {
@@ -15,12 +14,12 @@ interface FeatureCardProps {
 
 function FeatureCard({ icon, title, description }: FeatureCardProps) {
   return (
-    <div className="bg-card rounded-lg p-6 border shadow-sm hover:shadow-md transition-shadow">
-      <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
+    <div className="bg-white rounded-2xl p-6 border-0 shadow-sm hover:shadow-md transition-shadow">
+      <div className="h-14 w-14 rounded-full bg-mushprimary/10 flex items-center justify-center mb-5">
         {icon}
       </div>
-      <h3 className="text-xl font-semibold mb-2">{title}</h3>
-      <p className="text-muted-foreground">{description}</p>
+      <h3 className="text-xl font-bold mb-3 text-mushdark font-aeonik">{title}</h3>
+      <p className="text-mushgray">{description}</p>
     </div>
   );
 }
@@ -28,57 +27,49 @@ function FeatureCard({ icon, title, description }: FeatureCardProps) {
 export function Features() {
   const features = [
     {
-      icon: <Zap className="h-6 w-6 text-primary" />,
-      title: "Fast Performance",
+      icon: <Leaf className="h-7 w-7 text-mushprimary" />,
+      title: "100% Organic",
       description:
-        "Optimized for speed and efficiency, ensuring your website loads quickly on all devices.",
+        "All our mushrooms are grown organically, without any pesticides or harmful chemicals.",
     },
     {
-      icon: <Shield className="h-6 w-6 text-primary" />,
-      title: "Secure by Default",
+      icon: <UtensilsCrossed className="h-7 w-7 text-mushprimary" />,
+      title: "Culinary Excellence",
       description:
-        "Built with security in mind, protecting your data and your users' information.",
+        "Carefully selected varieties that enhance flavor profiles in any dish.",
     },
     {
-      icon: <Smartphone className="h-6 w-6 text-primary" />,
-      title: "Responsive Design",
+      icon: <Truck className="h-7 w-7 text-mushprimary" />,
+      title: "Fast Delivery",
       description:
-        "Looks great on all devices, from mobile phones to desktop computers.",
+        "From farm to table in 24 hours, ensuring maximum freshness and nutrient retention.",
     },
     {
-      icon: <Code className="h-6 w-6 text-primary" />,
-      title: "Clean Code",
+      icon: <Heart className="h-7 w-7 text-mushprimary" />,
+      title: "Health Benefits",
       description:
-        "Written with best practices and maintainability in mind, making it easy to customize.",
-    },
-    {
-      icon: <PaintBucket className="h-6 w-6 text-primary" />,
-      title: "Customizable",
-      description:
-        "Easily change colors, fonts, and layouts to match your brand and requirements.",
-    },
-    {
-      icon: <LayoutGrid className="h-6 w-6 text-primary" />,
-      title: "Modular Components",
-      description:
-        "Built with reusable components that can be mixed and matched to create unique layouts.",
+        "Rich in vitamins, minerals, and antioxidants to support your overall wellbeing.",
     },
   ];
 
   return (
-    <section id="features" className="py-16 md:py-24 bg-muted/50">
-      <div className="container">
+    <section id="features" className="py-16 md:py-24 bg-mushlight">
+      <div className="container px-4">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Powerful Features
+          <div className="flex justify-center items-center gap-2 mb-3">
+            <div className="h-2 w-10 bg-mushprimary"></div>
+            <p className="text-sm uppercase tracking-wide text-mushgray font-medium">Why Choose Us</p>
+            <div className="h-2 w-10 bg-mushprimary"></div>
+          </div>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-mushdark font-aeonik">
+            What Makes Our Mushrooms Special
           </h2>
-          <p className="text-xl text-muted-foreground">
-            Everything you need to build beautiful websites that stand out from
-            the crowd.
+          <p className="text-lg text-mushgray">
+            We're committed to quality at every step from cultivation to delivery.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {features.map((feature, index) => (
             <FeatureCard
               key={index}

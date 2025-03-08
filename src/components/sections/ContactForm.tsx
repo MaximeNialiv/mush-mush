@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,6 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
+import { Mail, Phone, MapPin } from "lucide-react";
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -57,95 +59,58 @@ export function ContactForm() {
   }
 
   return (
-    <section id="contact" className="py-16 md:py-24">
-      <div className="container">
+    <section id="contact" className="py-16 md:py-24 bg-mushlight">
+      <div className="container px-4">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="h-2 w-10 bg-mushprimary"></div>
+              <p className="text-sm uppercase tracking-wide text-mushgray font-medium">Contact Us</p>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-mushdark font-aeonik">
               Get in Touch
             </h2>
-            <p className="text-xl text-muted-foreground mb-6">
-              Have questions or feedback? We'd love to hear from you. Fill out
-              the form and we'll get back to you as soon as possible.
+            <p className="text-lg text-mushgray mb-8">
+              Have questions or want to place a special order? We'd love to hear from you. 
+              Fill out the form and we'll get back to you as soon as possible.
             </p>
 
-            <div className="space-y-4 mt-8">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="text-primary"
-                  >
-                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-                  </svg>
+            <div className="space-y-6 mt-8">
+              <div className="flex items-center gap-4">
+                <div className="h-12 w-12 rounded-full bg-mushprimary/10 flex items-center justify-center">
+                  <Phone className="h-5 w-5 text-mushprimary" />
                 </div>
                 <div>
-                  <h4 className="font-medium">Phone</h4>
-                  <p className="text-muted-foreground">+1 (555) 123-4567</p>
+                  <h4 className="font-bold text-mushdark">Phone</h4>
+                  <p className="text-mushgray">+1 (555) 123-4567</p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="text-primary"
-                  >
-                    <rect width="20" height="16" x="2" y="4" rx="2"></rect>
-                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
-                  </svg>
+              <div className="flex items-center gap-4">
+                <div className="h-12 w-12 rounded-full bg-mushprimary/10 flex items-center justify-center">
+                  <Mail className="h-5 w-5 text-mushprimary" />
                 </div>
                 <div>
-                  <h4 className="font-medium">Email</h4>
-                  <p className="text-muted-foreground">info@example.com</p>
+                  <h4 className="font-bold text-mushdark">Email</h4>
+                  <p className="text-mushgray">hello@mushmush.com</p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="text-primary"
-                  >
-                    <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path>
-                    <circle cx="12" cy="10" r="3"></circle>
-                  </svg>
+              <div className="flex items-center gap-4">
+                <div className="h-12 w-12 rounded-full bg-mushprimary/10 flex items-center justify-center">
+                  <MapPin className="h-5 w-5 text-mushprimary" />
                 </div>
                 <div>
-                  <h4 className="font-medium">Address</h4>
-                  <p className="text-muted-foreground">
-                    123 Main St, Anytown, USA
+                  <h4 className="font-bold text-mushdark">Address</h4>
+                  <p className="text-mushgray">
+                    123 Mushroom Lane, Fungi City, FC 12345
                   </p>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="bg-card p-8 rounded-lg border shadow-sm">
+          <div className="bg-white p-8 rounded-2xl shadow-sm">
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
@@ -156,9 +121,9 @@ export function ContactForm() {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Name</FormLabel>
+                      <FormLabel className="text-mushdark">Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="Your name" {...field} />
+                        <Input placeholder="Your name" {...field} className="rounded-lg border-gray-200" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -170,12 +135,13 @@ export function ContactForm() {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel className="text-mushdark">Email</FormLabel>
                       <FormControl>
                         <Input
                           placeholder="Your email address"
                           type="email"
                           {...field}
+                          className="rounded-lg border-gray-200"
                         />
                       </FormControl>
                       <FormMessage />
@@ -188,11 +154,11 @@ export function ContactForm() {
                   name="message"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Message</FormLabel>
+                      <FormLabel className="text-mushdark">Message</FormLabel>
                       <FormControl>
                         <Textarea
                           placeholder="Your message"
-                          className="min-h-[120px]"
+                          className="min-h-[120px] rounded-lg border-gray-200"
                           {...field}
                         />
                       </FormControl>
@@ -203,7 +169,7 @@ export function ContactForm() {
 
                 <Button
                   type="submit"
-                  className="w-full"
+                  className="w-full bg-mushprimary hover:bg-mushprimary/90 text-white rounded-full font-aeonik"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? "Sending..." : "Send Message"}

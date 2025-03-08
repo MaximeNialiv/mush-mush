@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Menu, X } from "lucide-react";
@@ -11,36 +12,46 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between">
+    <header className="sticky top-0 z-50 w-full bg-mushlight">
+      <div className="container mx-auto flex h-20 items-center justify-between px-4">
         <div className="flex items-center gap-2">
-          <Link to="/" className="font-bold text-xl">
-            LandingPage
+          <Link to="/" className="font-aeonik font-bold text-2xl text-mushdark">
+            mush•mush
           </Link>
         </div>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-6">
+        <nav className="hidden md:flex items-center gap-8">
           <Link
             to="/"
-            className="text-sm font-medium hover:text-primary transition-colors"
+            className="font-aeonik text-base font-medium text-mushdark hover:text-mushprimary transition-colors"
           >
             Home
           </Link>
           <Link
             to="#features"
-            className="text-sm font-medium hover:text-primary transition-colors"
+            className="font-aeonik text-base font-medium text-mushdark hover:text-mushprimary transition-colors"
           >
-            Features
+            About
+          </Link>
+          <Link
+            to="#testimonials"
+            className="font-aeonik text-base font-medium text-mushdark hover:text-mushprimary transition-colors"
+          >
+            Menu
           </Link>
           <Link
             to="#contact"
-            className="text-sm font-medium hover:text-primary transition-colors"
+            className="font-aeonik text-base font-medium text-mushdark hover:text-mushprimary transition-colors"
           >
             Contact
           </Link>
-          <Button variant="default" size="sm">
-            Get Started
+          <Button 
+            variant="default" 
+            size="lg"
+            className="bg-mushprimary hover:bg-mushprimary/90 text-white rounded-full font-aeonik"
+          >
+            Order Now
           </Button>
         </nav>
 
@@ -50,37 +61,48 @@ export function Header() {
           onClick={toggleMenu}
           aria-label={isMenuOpen ? "Close Menu" : "Open Menu"}
         >
-          {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          {isMenuOpen ? <X size={24} className="text-mushdark" /> : <Menu size={24} className="text-mushdark" />}
         </button>
       </div>
 
       {/* Mobile Navigation */}
       {isMenuOpen && (
-        <div className="md:hidden absolute top-16 left-0 right-0 bg-background border-b">
-          <nav className="container py-4 flex flex-col gap-4">
+        <div className="md:hidden absolute top-20 left-0 right-0 bg-mushlight">
+          <nav className="container py-6 flex flex-col gap-6">
             <Link
               to="/"
-              className="text-sm font-medium hover:text-primary transition-colors"
+              className="font-aeonik text-base font-medium text-mushdark hover:text-mushprimary transition-colors"
               onClick={() => setIsMenuOpen(false)}
             >
               Home
             </Link>
             <Link
               to="#features"
-              className="text-sm font-medium hover:text-primary transition-colors"
+              className="font-aeonik text-base font-medium text-mushdark hover:text-mushprimary transition-colors"
               onClick={() => setIsMenuOpen(false)}
             >
-              Features
+              About
+            </Link>
+            <Link
+              to="#testimonials"
+              className="font-aeonik text-base font-medium text-mushdark hover:text-mushprimary transition-colors"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Menu
             </Link>
             <Link
               to="#contact"
-              className="text-sm font-medium hover:text-primary transition-colors"
+              className="font-aeonik text-base font-medium text-mushdark hover:text-mushprimary transition-colors"
               onClick={() => setIsMenuOpen(false)}
             >
               Contact
             </Link>
-            <Button variant="default" size="sm" className="w-full">
-              Get Started
+            <Button 
+              variant="default" 
+              size="lg" 
+              className="w-full bg-mushprimary hover:bg-mushprimary/90 text-white rounded-full font-aeonik"
+            >
+              Order Now
             </Button>
           </nav>
         </div>

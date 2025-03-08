@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,7 +62,14 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+				mushprimary: '#FB5C00',
+				mushdark: '#121212',
+				mushlight: '#FBFAF8',
+				mushgray: '#888888',
+			},
+			fontFamily: {
+				aeonik: ['Aeonik', 'sans-serif'],
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
