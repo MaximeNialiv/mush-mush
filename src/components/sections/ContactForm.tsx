@@ -1,9 +1,16 @@
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Form,
   FormControl,
@@ -12,29 +19,21 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { toast } from "@/components/ui/use-toast";
-import { Mail, Phone, MapPin } from "lucide-react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { toast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
-  name: z.string().min(2, {
-    message: "Name must be at least 2 characters.",
-  }),
-  email: z.string().email({
-    message: "Please enter a valid email address.",
-  }),
-  message: z.string().min(10, {
-    message: "Message must be at least 10 characters.",
-  }),
+  name: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
+  email: z.string().email("Adresse email invalide"),
+  message: z.string().min(10, "Le message doit contenir au moins 10 caractères"),
 });
 
-type FormValues = z.infer<typeof formSchema>;
+export const ContactForm = () => {
+  const [isLoading, setIsLoading] = useState(false);
 
-export function ContactForm() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const form = useForm<FormValues>({
+  const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
@@ -43,142 +42,117 @@ export function ContactForm() {
     },
   });
 
-  function onSubmit(values: FormValues) {
-    setIsSubmitting(true);
-
-    // Simulate API call
-    setTimeout(() => {
-      console.log(values);
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    setIsLoading(true);
+    try {
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      
       toast({
-        title: "Form submitted!",
-        description: "We'll get back to you as soon as possible.",
+        description: "Votre message a été envoyé avec succès !",
       });
+      
       form.reset();
-      setIsSubmitting(false);
-    }, 1500);
-  }
+    } catch (error) {
+      toast({
+        variant: "destructive", 
+        description: "Une erreur est survenue lors de l'envoi du message.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
-    <section id="contact" className="py-16 md:py-24 bg-mushlight">
-      <div className="container px-4">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <div>
-            <div className="flex items-center gap-2 mb-3">
-              <div className="h-2 w-10 bg-mushprimary"></div>
-              <p className="text-sm uppercase tracking-wide text-mushgray font-medium">Contact Us</p>
-            </div>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-mushdark font-aeonik">
-              Get in Touch
-            </h2>
-            <p className="text-lg text-mushgray mb-8">
-              Have questions or want to place a special order? We'd love to hear from you. 
-              Fill out the form and we'll get back to you as soon as possible.
-            </p>
-
-            <div className="space-y-6 mt-8">
-              <div className="flex items-center gap-4">
-                <div className="h-12 w-12 rounded-full bg-mushprimary/10 flex items-center justify-center">
-                  <Phone className="h-5 w-5 text-mushprimary" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-mushdark">Phone</h4>
-                  <p className="text-mushgray">+1 (555) 123-4567</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4">
-                <div className="h-12 w-12 rounded-full bg-mushprimary/10 flex items-center justify-center">
-                  <Mail className="h-5 w-5 text-mushprimary" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-mushdark">Email</h4>
-                  <p className="text-mushgray">hello@mushmush.com</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4">
-                <div className="h-12 w-12 rounded-full bg-mushprimary/10 flex items-center justify-center">
-                  <MapPin className="h-5 w-5 text-mushprimary" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-mushdark">Address</h4>
-                  <p className="text-mushgray">
-                    123 Mushroom Lane, Fungi City, FC 12345
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white p-8 rounded-2xl shadow-sm">
-            <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-6"
-              >
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-mushdark">Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Your name" {...field} className="rounded-lg border-gray-200" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-mushdark">Email</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Your email address"
-                          type="email"
-                          {...field}
-                          className="rounded-lg border-gray-200"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="message"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-mushdark">Message</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder="Your message"
-                          className="min-h-[120px] rounded-lg border-gray-200"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <Button
-                  type="submit"
-                  className="w-full bg-mushprimary hover:bg-mushprimary/90 text-white rounded-full font-aeonik"
-                  disabled={isSubmitting}
+    <section id="contact" className="py-16 bg-zinc-50">
+      <div className="container px-4 md:px-6">
+        <div className="flex flex-col items-center space-y-4 text-center mb-10">
+          <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl">
+            Contactez-nous
+          </h2>
+          <p className="text-muted-foreground md:w-[60%]">
+            Une question ou une suggestion ? N'hésitez pas à nous envoyer un message !
+          </p>
+        </div>
+        <div className="mx-auto w-full max-w-md">
+          <Card>
+            <CardHeader>
+              <CardTitle>Formulaire de contact</CardTitle>
+              <CardDescription>
+                Remplissez ce formulaire pour nous envoyer un message.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-4"
                 >
-                  {isSubmitting ? "Sending..." : "Send Message"}
-                </Button>
-              </form>
-            </Form>
-          </div>
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nom</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Votre nom" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="email"
+                            placeholder="votre.email@exemple.com"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="message"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Message</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Votre message..."
+                            rows={5}
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? "Envoi en cours..." : "Envoyer"}
+                  </Button>
+                </form>
+              </Form>
+            </CardContent>
+            <CardFooter className="flex justify-center">
+              <p className="text-xs text-muted-foreground">
+                Nous vous répondrons dans les plus brefs délais.
+              </p>
+            </CardFooter>
+          </Card>
         </div>
       </div>
     </section>
   );
-}
+};
