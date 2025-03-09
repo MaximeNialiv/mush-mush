@@ -12,7 +12,7 @@ export function Hero() {
               <div className="h-2 w-10 bg-mushprimary"></div>
               <p className="text-sm uppercase tracking-wide text-mushgray font-medium">Premium Quality</p>
             </div>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-mushdark font-aeonik leading-tight">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-mushdark leading-tight">
               Discover the<br />
               <span className="text-mushprimary">Freshest Mushrooms</span><br />
               For Your Meals
@@ -23,7 +23,7 @@ export function Hero() {
             <div className="flex flex-col sm:flex-row gap-4 mt-4">
               <Button 
                 size="lg" 
-                className="bg-mushprimary hover:bg-mushprimary/90 text-white rounded-full font-aeonik"
+                className="bg-mushprimary hover:bg-mushprimary/90 text-white rounded-full"
               >
                 Order Now
               </Button>

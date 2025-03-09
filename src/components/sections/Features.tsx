@@ -18,7 +18,7 @@ function FeatureCard({ icon, title, description }: FeatureCardProps) {
       <div className="h-14 w-14 rounded-full bg-mushprimary/10 flex items-center justify-center mb-5">
         {icon}
       </div>
-      <h3 className="text-xl font-bold mb-3 text-mushdark font-aeonik">{title}</h3>
+      <h3 className="text-xl font-bold mb-3 text-mushdark">{title}</h3>
       <p className="text-mushgray">{description}</p>
     </div>
   );
@@ -61,7 +61,7 @@ export function Features() {
             <p className="text-sm uppercase tracking-wide text-mushgray font-medium">Why Choose Us</p>
             <div className="h-2 w-10 bg-mushprimary"></div>
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-mushdark font-aeonik">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-mushdark">
             What Makes Our Mushrooms Special
           </h2>
           <p className="text-lg text-mushgray">

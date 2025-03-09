@@ -15,7 +15,7 @@ export function Header() {
     <header className="sticky top-0 z-50 w-full bg-mushlight">
       <div className="container mx-auto flex h-20 items-center justify-between px-4">
         <div className="flex items-center gap-2">
-          <Link to="/" className="font-aeonik font-bold text-2xl text-mushdark">
+          <Link to="/" className="font-bold text-2xl text-mushdark">
             mush•mush
           </Link>
         </div>
@@ -24,32 +24,32 @@ export function Header() {
         <nav className="hidden md:flex items-center gap-8">
           <Link
             to="/"
-            className="font-aeonik text-base font-medium text-mushdark hover:text-mushprimary transition-colors"
+            className="text-base font-medium text-mushdark hover:text-mushprimary transition-colors"
           >
             Home
           </Link>
           <Link
             to="#features"
-            className="font-aeonik text-base font-medium text-mushdark hover:text-mushprimary transition-colors"
+            className="text-base font-medium text-mushdark hover:text-mushprimary transition-colors"
           >
             About
           </Link>
           <Link
             to="#testimonials"
-            className="font-aeonik text-base font-medium text-mushdark hover:text-mushprimary transition-colors"
+            className="text-base font-medium text-mushdark hover:text-mushprimary transition-colors"
           >
             Menu
           </Link>
           <Link
             to="#contact"
-            className="font-aeonik text-base font-medium text-mushdark hover:text-mushprimary transition-colors"
+            className="text-base font-medium text-mushdark hover:text-mushprimary transition-colors"
           >
             Contact
           </Link>
           <Button 
             variant="default" 
             size="lg"
-            className="bg-mushprimary hover:bg-mushprimary/90 text-white rounded-full font-aeonik"
+            className="bg-mushprimary hover:bg-mushprimary/90 text-white rounded-full"
           >
             Order Now
           </Button>
@@ -71,28 +71,28 @@ export function Header() {
           <nav className="container py-6 flex flex-col gap-6">
             <Link
               to="/"
-              className="font-aeonik text-base font-medium text-mushdark hover:text-mushprimary transition-colors"
+              className="text-base font-medium text-mushdark hover:text-mushprimary transition-colors"
               onClick={() => setIsMenuOpen(false)}
             >
               Home
             </Link>
             <Link
               to="#features"
-              className="font-aeonik text-base font-medium text-mushdark hover:text-mushprimary transition-colors"
+              className="text-base font-medium text-mushdark hover:text-mushprimary transition-colors"
               onClick={() => setIsMenuOpen(false)}
             >
               About
             </Link>
             <Link
               to="#testimonials"
-              className="font-aeonik text-base font-medium text-mushdark hover:text-mushprimary transition-colors"
+              className="text-base font-medium text-mushdark hover:text-mushprimary transition-colors"
               onClick={() => setIsMenuOpen(false)}
             >
               Menu
             </Link>
             <Link
               to="#contact"
-              className="font-aeonik text-base font-medium text-mushdark hover:text-mushprimary transition-colors"
+              className="text-base font-medium text-mushdark hover:text-mushprimary transition-colors"
               onClick={() => setIsMenuOpen(false)}
             >
               Contact
@@ -100,7 +100,7 @@ export function Header() {
             <Button 
               variant="default" 
               size="lg" 
-              className="w-full bg-mushprimary hover:bg-mushprimary/90 text-white rounded-full font-aeonik"
+              className="w-full bg-mushprimary hover:bg-mushprimary/90 text-white rounded-full"
             >
               Order Now
             </Button>

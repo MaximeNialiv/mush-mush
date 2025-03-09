@@ -19,6 +19,9 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -67,9 +70,6 @@ export default {
 				mushdark: '#121212',
 				mushlight: '#FBFAF8',
 				mushgray: '#888888',
-			},
-			fontFamily: {
-				aeonik: ['Aeonik', 'sans-serif'],
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

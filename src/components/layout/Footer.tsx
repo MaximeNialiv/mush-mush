@@ -7,7 +7,7 @@ export function Footer() {
       <div className="container px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
           <div className="col-span-1 md:col-span-2">
-            <h3 className="text-2xl font-bold mb-6 font-aeonik">mush•mush</h3>
+            <h3 className="text-2xl font-bold mb-6">mush•mush</h3>
             <p className="text-gray-300 max-w-md">
               Premium quality, organic mushrooms delivered fresh to your doorstep. 
               From gourmet varieties to medicinal mushrooms, we've got you covered.
@@ -47,7 +47,7 @@ export function Footer() {
           </div>
 
           <div>
-            <h4 className="font-bold text-lg mb-4 font-aeonik">Quick Links</h4>
+            <h4 className="font-bold text-lg mb-4">Quick Links</h4>
             <ul className="space-y-3">
               <li>
                 <Link
@@ -85,7 +85,7 @@ export function Footer() {
           </div>
 
           <div>
-            <h4 className="font-bold text-lg mb-4 font-aeonik">Legal</h4>
+            <h4 className="font-bold text-lg mb-4">Legal</h4>
             <ul className="space-y-3">
               <li>
                 <Link
