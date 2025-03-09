@@ -1,11 +1,19 @@
-// Adapted from https://ui.shadcn.com/docs/components/toast
-import { useToast as useToastOriginal } from "@/components/ui/toast";
 
-export const useToast = useToastOriginal;
+// Re-export from the main hook for backwards compatibility
+import { toast, useToast } from "@/hooks/use-toast";
 
-export {
-  toast,
-  type Toast,
-  type ToastActionElement,
-  type ToastProps,
-} from "@/components/ui/toast";
+// Re-export types
+export type Toast = {
+  id: string;
+  title?: string;
+  description?: string;
+  action?: React.ReactNode;
+};
+
+export type ToastActionElement = React.ReactElement;
+
+export type ToastProps = {
+  variant?: "default" | "destructive";
+};
+
+export { toast, useToast };
