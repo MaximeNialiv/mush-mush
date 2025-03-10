@@ -6,7 +6,7 @@ import { Card as CardType } from "@/types/card";
 import QCMCardContent from "./QCMCardContent";
 import MediaCardContent from "./MediaCardContent";
 import ParentCardContent from "./ParentCardContent";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, FileText, PenTool, Play } from "lucide-react";
 
 interface CardItemProps {
   card: CardType;
@@ -27,22 +27,45 @@ const CardItem: React.FC<CardItemProps> = ({ card, onSelect }) => {
     }
   };
 
+  const getCardIcon = () => {
+    switch (card.type) {
+      case 'qcm':
+        return <PenTool size={16} className="text-teal-500" />;
+      case 'media':
+        return card.mediaType === 'video' 
+          ? <Play size={16} className="text-red-500" />
+          : <FileText size={16} className="text-blue-500" />;
+      case 'parent':
+        return <FileText size={16} className="text-purple-500" />;
+      default:
+        return <FileText size={16} />;
+    }
+  };
+
   return (
-    <Card className="w-full max-w-md mx-auto mb-4">
-      <CardHeader>
-        <CardTitle>{card.title}</CardTitle>
-        <CardDescription>{card.description}</CardDescription>
+    <Card className="w-full overflow-hidden border border-gray-100 hover:shadow-md transition-all">
+      <CardHeader className="pb-2">
+        <div className="flex items-center gap-2 mb-1">
+          <div className="bg-gray-100 p-1 rounded-md">
+            {getCardIcon()}
+          </div>
+          <span className="text-xs text-mushgray uppercase font-medium">
+            {card.type === 'qcm' ? 'Quiz' : card.type === 'parent' ? 'Collection' : card.mediaType}
+          </span>
+        </div>
+        <CardTitle className="text-lg">{card.title}</CardTitle>
+        <CardDescription className="text-mushgray">{card.description}</CardDescription>
       </CardHeader>
       <CardContent>
         {renderCardContent()}
       </CardContent>
-      <CardFooter className="flex justify-end">
+      <CardFooter className="flex justify-end pt-2 pb-4 border-t">
         <Button 
-          variant="outline" 
+          variant="ghost" 
           onClick={() => onSelect && onSelect(card)}
-          className="flex items-center gap-2"
+          className="text-sm text-mushprimary hover:text-mushprimary/90 hover:bg-mushprimary/5 p-2 h-auto"
         >
-          Voir détails <ChevronRight size={16} />
+          Voir détails <ChevronRight size={14} />
         </Button>
       </CardFooter>
     </Card>
