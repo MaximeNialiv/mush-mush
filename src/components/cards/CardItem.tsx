@@ -30,30 +30,30 @@ const CardItem: React.FC<CardItemProps> = ({ card, onSelect }) => {
   const getCardIcon = () => {
     switch (card.type) {
       case 'qcm':
-        return <PenTool size={16} className="text-teal-500" />;
+        return <PenTool size={16} className="text-mushprimary" />;
       case 'media':
         return card.mediaType === 'video' 
-          ? <Play size={16} className="text-red-500" />
-          : <FileText size={16} className="text-blue-500" />;
+          ? <Play size={16} className="text-mushprimary" />
+          : <FileText size={16} className="text-mushprimary" />;
       case 'parent':
-        return <FileText size={16} className="text-purple-500" />;
+        return <FileText size={16} className="text-mushprimary" />;
       default:
-        return <FileText size={16} />;
+        return <FileText size={16} className="text-mushprimary" />;
     }
   };
 
   return (
-    <Card className="w-full overflow-hidden border border-gray-100 hover:shadow-md transition-all">
+    <Card className="w-full overflow-hidden border border-gray-100 hover:shadow-md transition-all rounded-2xl">
       <CardHeader className="pb-2">
         <div className="flex items-center gap-2 mb-1">
-          <div className="bg-gray-100 p-1 rounded-md">
+          <div className="bg-mushprimary/10 p-1 rounded-md">
             {getCardIcon()}
           </div>
           <span className="text-xs text-mushgray uppercase font-medium">
             {card.type === 'qcm' ? 'Quiz' : card.type === 'parent' ? 'Collection' : card.mediaType}
           </span>
         </div>
-        <CardTitle className="text-lg">{card.title}</CardTitle>
+        <CardTitle className="text-lg font-semibold">{card.title}</CardTitle>
         <CardDescription className="text-mushgray">{card.description}</CardDescription>
       </CardHeader>
       <CardContent>

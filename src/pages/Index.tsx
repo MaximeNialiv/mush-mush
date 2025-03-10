@@ -12,7 +12,7 @@ const Index = () => {
       <Header />
       <div className="container mx-auto px-4 py-8">
         <section className="mb-12 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6 text-mushdark">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4 text-mushdark">
             Guide complet de l'écologie
           </h1>
           <p className="text-xl text-mushgray mb-8 max-w-3xl mx-auto">
@@ -38,7 +38,7 @@ const Index = () => {
             </Button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all flex items-center gap-4">
+            <div className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-all flex items-center gap-4">
               <div className="bg-mushprimary/10 p-3 rounded-full">
                 <Leaf className="text-mushprimary" size={24} />
               </div>
@@ -47,7 +47,7 @@ const Index = () => {
                 <p className="text-sm text-mushgray">12 articles</p>
               </div>
             </div>
-            <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all flex items-center gap-4">
+            <div className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-all flex items-center gap-4">
               <div className="bg-mushprimary/10 p-3 rounded-full">
                 <Recycle className="text-mushprimary" size={24} />
               </div>
@@ -56,7 +56,7 @@ const Index = () => {
                 <p className="text-sm text-mushgray">8 articles</p>
               </div>
             </div>
-            <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all flex items-center gap-4">
+            <div className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-all flex items-center gap-4">
               <div className="bg-mushprimary/10 p-3 rounded-full">
                 <Search className="text-mushprimary" size={24} />
               </div>
@@ -68,7 +68,7 @@ const Index = () => {
           </div>
         </section>
         
-        <main className="bg-white rounded-xl shadow-sm p-6">
+        <main className="bg-white rounded-2xl shadow-sm p-6 mb-8">
           <CardFeed 
             cards={mockCards}
             title="Contenus éducatifs"
