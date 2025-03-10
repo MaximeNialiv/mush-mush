@@ -11,7 +11,7 @@ const Index = () => {
       <main className="flex-grow">
         <CardFeed 
           cards={mockCards}
-          title="Mush•Mush - Guide des champignons"
+          title="Mush•Mush - Guide de l'écologie"
         />
       </main>
       <Footer />
