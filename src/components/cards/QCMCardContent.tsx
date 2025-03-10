@@ -4,7 +4,7 @@ import { QCMCard } from "@/types/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { toast } from "@/hooks/use-toast";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface QCMCardContentProps {
   card: QCMCard;
@@ -12,22 +12,26 @@ interface QCMCardContentProps {
 
 const QCMCardContent: React.FC<QCMCardContentProps> = ({ card }) => {
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
+  const [feedback, setFeedback] = useState<{ message: string; variant: "default" | "destructive" } | null>(null);
   
   const handleSubmit = () => {
     if (selectedOption === null) {
-      toast({
-        description: "Veuillez sélectionner une réponse"
+      setFeedback({ 
+        message: "Veuillez sélectionner une réponse", 
+        variant: "destructive" 
       });
       return;
     }
     
     if (card.correctAnswer !== undefined && selectedOption === card.correctAnswer) {
-      toast({
-        description: "Bonne réponse !"
+      setFeedback({ 
+        message: "Bonne réponse !", 
+        variant: "default" 
       });
     } else if (card.correctAnswer !== undefined) {
-      toast({
-        description: "Mauvaise réponse"
+      setFeedback({ 
+        message: "Mauvaise réponse", 
+        variant: "destructive" 
       });
     }
   };
@@ -35,6 +39,13 @@ const QCMCardContent: React.FC<QCMCardContentProps> = ({ card }) => {
   return (
     <div className="space-y-4">
       <h3 className="font-medium">{card.question}</h3>
+      
+      {feedback && (
+        <Alert variant={feedback.variant}>
+          <AlertDescription>{feedback.message}</AlertDescription>
+        </Alert>
+      )}
+      
       <RadioGroup value={selectedOption?.toString()} onValueChange={(value) => setSelectedOption(parseInt(value))}>
         {card.options.map((option, index) => (
           <div key={index} className="flex items-center space-x-2">

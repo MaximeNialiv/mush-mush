@@ -1,13 +1,13 @@
 
-import { toast as sonnerToast } from "sonner";
-
-// Re-export sonner toast for convenience
-export const toast = sonnerToast;
-
-// Create a custom hook to access toast context (this will be empty since we're using sonner)
+// Placeholder for future toast functionality if needed
 export const useToast = () => {
   return {
     toasts: [],
     dismiss: () => {},
   };
+};
+
+// Simple console log as a substitute for toast notifications
+export const toast = (options: { description?: string }) => {
+  console.log("Notification:", options.description || "");
 };
