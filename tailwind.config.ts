@@ -66,10 +66,11 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				mushprimary: '#FB5C00',
-				mushdark: '#121212',
-				mushlight: '#FBFAF8',
+				mushprimary: '#387A74',
+				mushdark: '#000000',
+				mushlight: '#FFFFFF',
 				mushgray: '#888888',
+				mushsecondary: '#DCA24A',
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

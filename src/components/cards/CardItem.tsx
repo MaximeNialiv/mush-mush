@@ -6,7 +6,7 @@ import { Card as CardType } from "@/types/card";
 import QCMCardContent from "./QCMCardContent";
 import MediaCardContent from "./MediaCardContent";
 import ParentCardContent from "./ParentCardContent";
-import { ChevronRight, FileText, PenTool, Play } from "lucide-react";
+import { ChevronRight, FileText, MoreVertical, PenTool, Play } from "lucide-react";
 
 interface CardItemProps {
   card: CardType;
@@ -30,36 +30,38 @@ const CardItem: React.FC<CardItemProps> = ({ card, onSelect }) => {
   const getCardIcon = () => {
     switch (card.type) {
       case 'qcm':
-        return <PenTool size={16} className="text-mushprimary" />;
+        return <PenTool size={16} className="text-white" />;
       case 'media':
         return card.mediaType === 'video' 
-          ? <Play size={16} className="text-mushprimary" />
-          : <FileText size={16} className="text-mushprimary" />;
+          ? <Play size={16} className="text-white" />
+          : <FileText size={16} className="text-white" />;
       case 'parent':
-        return <FileText size={16} className="text-mushprimary" />;
+        return <FileText size={16} className="text-white" />;
       default:
-        return <FileText size={16} className="text-mushprimary" />;
+        return <FileText size={16} className="text-white" />;
     }
   };
 
   return (
-    <Card className="w-full overflow-hidden border border-gray-100 hover:shadow-md transition-all rounded-2xl">
-      <CardHeader className="pb-2">
-        <div className="flex items-center gap-2 mb-1">
-          <div className="bg-mushprimary/10 p-1 rounded-md">
-            {getCardIcon()}
+    <Card className="w-full overflow-hidden border-none bg-white shadow-lg hover:shadow-xl transition-all rounded-[32px]">
+      <CardHeader className="pb-2 relative">
+        <div className="flex justify-between items-start">
+          <div className="flex items-center gap-3">
+            <div className="bg-mushprimary p-3 rounded-full">
+              {getCardIcon()}
+            </div>
+            <CardTitle className="text-xl font-bold">{card.title}</CardTitle>
           </div>
-          <span className="text-xs text-mushgray uppercase font-medium">
-            {card.type === 'qcm' ? 'Quiz' : card.type === 'parent' ? 'Collection' : card.mediaType}
-          </span>
+          <Button variant="ghost" className="h-8 w-8 p-0">
+            <MoreVertical size={20} />
+          </Button>
         </div>
-        <CardTitle className="text-lg font-semibold">{card.title}</CardTitle>
-        <CardDescription className="text-mushgray">{card.description}</CardDescription>
+        <CardDescription className="text-mushgray mt-2">{card.description}</CardDescription>
       </CardHeader>
       <CardContent>
         {renderCardContent()}
       </CardContent>
-      <CardFooter className="flex justify-end pt-2 pb-4 border-t">
+      <CardFooter className="justify-end pt-2 pb-4">
         <Button 
           variant="ghost" 
           onClick={() => onSelect && onSelect(card)}

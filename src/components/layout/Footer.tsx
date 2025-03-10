@@ -4,7 +4,7 @@ import { Facebook, Instagram, Leaf, Linkedin, Twitter } from "lucide-react";
 
 export function Footer() {
   return (
-    <footer className="bg-mushdark py-12 text-white">
+    <footer className="mt-auto bg-mushdark py-8 text-white">
       <div className="container px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="col-span-1 md:col-span-2">
@@ -127,7 +127,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-white/10 mt-10 pt-6 flex flex-col md:flex-row justify-between items-center">
+        <div className="border-t border-white/10 mt-6 pt-6 flex flex-col md:flex-row justify-between items-center">
           <p className="text-sm text-gray-400">
             © {new Date().getFullYear()} Mush•Mush. Tous droits réservés.
           </p>
