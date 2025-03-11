@@ -4,7 +4,9 @@ import { CardHeader } from './CardHeader';
 import { CardContent } from './CardContent';
 import { CardFooter } from './CardFooter';
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, Filter, Home } from "lucide-react";
+import { ChevronLeft, Filter } from "lucide-react";
+import { Search } from "@/components/Search";
+import { Menu } from "lucide-react";
 
 interface CardFeedProps {
   cards: Card[];
