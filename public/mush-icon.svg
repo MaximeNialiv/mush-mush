@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32px" height="32px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg">
+    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <!-- Chapeau du champignon -->
+        <path d="M16,4 C9.372583,4 4,7.581722 4,12 C4,16.418278 9.372583,20 16,20 C22.627417,20 28,16.418278 28,12 C28,7.581722 22.627417,4 16,4" fill="#FF4B4B"/>
+        <!-- Points blancs -->
+        <circle fill="#FFFFFF" cx="12" cy="10" r="2"/>
+        <circle fill="#FFFFFF" cx="20" cy="9" r="1.5"/>
+        <circle fill="#FFFFFF" cx="16" cy="12" r="1"/>
+        <circle fill="#FFFFFF" cx="22" cy="13" r="1"/>
+        <circle fill="#FFFFFF" cx="14" cy="8" r="1"/>
+        <!-- Pied du champignon -->
+        <path d="M13,19 L19,19 C19,19 20,28 16,28 C12,28 13,19 13,19" fill="#E6E6E6"/>
+    </g>
+</svg>
