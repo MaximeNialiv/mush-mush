@@ -1,8 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
-  'https://qeswzexucwpzdwwtvpjk.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFlc3d6ZXh1Y3dwemR3d3R2cGprIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE2MDY5NzYsImV4cCI6MjA1NzE4Mjk3Nn0.g5mRG5FDdWRcCx7UkyUP61wIaPg5L3Eo7iY8iebvXyY'
+  process.env.VITE_SUPABASE_URL,
+  process.env.VITE_SUPABASE_ANON_KEY
 );
 
 async function checkData() {
