@@ -120,8 +120,8 @@ const Index = () => {
     <div 
       className="min-h-screen bg-cover bg-center bg-fixed bg-[#E0F2F1]"
       style={{
-        backgroundImage: parentCard?.type === 'workshop' 
-          ? `url('${parentCard.image}')`
+        backgroundImage: parentCard 
+          ? `url('${(parentCard as any).image}')`
           : `url('https://assets.softr-files.com/applications/0529c7f1-880a-41d3-addc-b489b2ba7989/assets/411467df-de8f-47cd-aa64-c8bfef1242db.jpeg')`,
         backgroundBlendMode: 'overlay',
       }}

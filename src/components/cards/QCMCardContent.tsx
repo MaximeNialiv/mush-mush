@@ -11,11 +11,11 @@ interface QCMCardContentProps {
 }
 
 const QCMCardContent: React.FC<QCMCardContentProps> = ({ card }) => {
-  const [selectedOption, setSelectedOption] = useState<number | null>(null);
+  const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<{ message: string; variant: "default" | "destructive" } | null>(null);
   
   const handleSubmit = () => {
-    if (selectedOption === null) {
+    if (!selectedOption) {
       setFeedback({ 
         message: "Veuillez sélectionner une réponse", 
         variant: "destructive" 
@@ -23,12 +23,13 @@ const QCMCardContent: React.FC<QCMCardContentProps> = ({ card }) => {
       return;
     }
     
-    if (card.correctAnswer !== undefined && selectedOption === card.correctAnswer) {
+    const correctOption = card.options.find(opt => opt.isCorrect);
+    if (correctOption && selectedOption === correctOption.id) {
       setFeedback({ 
         message: "Bonne réponse !", 
         variant: "default" 
       });
-    } else if (card.correctAnswer !== undefined) {
+    } else {
       setFeedback({ 
         message: "Mauvaise réponse", 
         variant: "destructive" 
@@ -46,11 +47,11 @@ const QCMCardContent: React.FC<QCMCardContentProps> = ({ card }) => {
         </Alert>
       )}
       
-      <RadioGroup value={selectedOption?.toString()} onValueChange={(value) => setSelectedOption(parseInt(value))}>
-        {card.options.map((option, index) => (
-          <div key={index} className="flex items-center space-x-2">
-            <RadioGroupItem value={index.toString()} id={`option-${index}`} />
-            <Label htmlFor={`option-${index}`}>{option}</Label>
+      <RadioGroup value={selectedOption || ''} onValueChange={setSelectedOption}>
+        {card.options.map((option) => (
+          <div key={option.id} className="flex items-center space-x-2">
+            <RadioGroupItem value={option.id} id={option.id} />
+            <Label htmlFor={option.id}>{option.text}</Label>
           </div>
         ))}
       </RadioGroup>

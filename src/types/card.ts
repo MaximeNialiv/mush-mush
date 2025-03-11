@@ -24,6 +24,7 @@ export interface MediaCard extends BaseCard {
   mediaType: 'video' | 'url' | 'pdf';
   mediaUrl: string;
   thumbnailUrl?: string;
+  image?: string;
 }
 
 export interface ParentCard extends BaseCard {
