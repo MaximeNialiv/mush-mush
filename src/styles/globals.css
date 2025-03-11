@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .card-base {
+    @apply bg-white rounded-lg shadow-lg overflow-hidden border border-black/10 transition-all duration-300 hover:shadow-xl;
+  }
+
+  .card-header {
+    @apply flex items-center justify-between p-4 border-b border-black/10;
+  }
+
+  .card-title {
+    @apply font-['Archivo_Black'] text-lg;
+  }
+
+  .card-content {
+    @apply p-4;
+  }
+
+  .card-points {
+    @apply flex items-center gap-2 text-sm text-gray-600;
+  }
+
+  .card-image {
+    @apply w-full h-48 object-cover px-4 pb-4 rounded-md;
+  }
+
+  .button-base {
+    @apply px-4 py-2 rounded-md transition-colors duration-200;
+  }
+
+  .button-primary {
+    @apply button-base bg-black text-white hover:bg-black/80;
+  }
+
+  .button-secondary {
+    @apply button-base bg-gray-100 text-gray-900 hover:bg-gray-200;
+  }
+} 
