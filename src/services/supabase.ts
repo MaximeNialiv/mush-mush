@@ -1,8 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
-import { Card, QCMCard, MediaCard, ParentCard } from '@/types/card';
+import { Card, QCMCard, ParentCard } from '@/types/card';
+import { MediaCardData, MediaType, MediaMetadata } from '@/types/media';
+import { mediaService } from './mediaService';
 
-// Initialisation du client Supabase
-// Ces URL et clé devront être définies dans votre fichier .env
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
@@ -10,23 +10,20 @@ if (!supabaseUrl || !supabaseKey) {
   console.error('Les variables d\'environnement Supabase ne sont pas définies');
 }
 
-const supabase = createClient(supabaseUrl, supabaseKey);
+export const supabase = createClient(supabaseUrl, supabaseKey);
 
-/**
- * Service pour interagir avec Supabase
- */
 class SupabaseService {
-  /**
-   * Récupère toutes les cartes
-   */
   async getAllCards(): Promise<Card[]> {
     try {
       console.log('Récupération des cartes depuis Supabase...');
       
-      // Récupérer toutes les cartes
       const { data: cards, error } = await supabase
         .from('cards')
-        .select('*');
+        .select(`
+          *,
+          media_metadata (*),
+          quiz_options (*)
+        `);
         
       if (error) throw error;
       
@@ -37,25 +34,7 @@ class SupabaseService {
       
       console.log(`${cards.length} cartes récupérées`);
       
-      // Récupérer les options pour les cartes QCM
-      const qcmCards = cards.filter(card => card.type === 'qcm');
-      if (qcmCards.length > 0) {
-        const qcmIds = qcmCards.map(card => card.id);
-        const { data: options, error: optionsError } = await supabase
-          .from('quiz_options')
-          .select('*')
-          .in('card_id', qcmIds);
-          
-        if (optionsError) throw optionsError;
-        
-        if (options) {
-          qcmCards.forEach(card => {
-            card.options = options.filter(option => option.card_id === card.id);
-          });
-        }
-      }
-      
-      // Récupérer les relations parent-enfant pour les cartes parent
+      // Récupérer les relations parent-enfant
       const parentCards = cards.filter(card => card.type === 'parent');
       if (parentCards.length > 0) {
         parentCards.forEach(parentCard => {
@@ -65,17 +44,13 @@ class SupabaseService {
         });
       }
       
-      // Transformer les données de Supabase en type Card
       return this.transformCards(cards);
     } catch (error) {
       console.error('Erreur lors de la récupération des cartes:', error);
       return this.getMockCards();
     }
   }
-  
-  /**
-   * Transforme les données Supabase en types de l'application
-   */
+
   private transformCards(supabaseCards: any[]): Card[] {
     return supabaseCards.map(card => {
       const baseCard = {
@@ -92,7 +67,7 @@ class SupabaseService {
             ...baseCard,
             type: 'qcm',
             question: card.question,
-            options: (card.options || []).map((opt: any) => ({
+            options: (card.quiz_options || []).map((opt: any) => ({
               id: opt.id,
               text: opt.text,
               isCorrect: opt.is_correct
@@ -103,10 +78,10 @@ class SupabaseService {
           return {
             ...baseCard,
             type: 'media',
-            mediaType: card.media_type,
+            mediaType: card.media_type as MediaType,
             mediaUrl: card.media_url,
-            thumbnailUrl: card.thumbnail_url
-          } as MediaCard;
+            metadata: this.transformMediaMetadata(card.media_metadata)
+          } as MediaCardData;
           
         case 'parent':
           return {
@@ -121,63 +96,116 @@ class SupabaseService {
       }
     }).filter(Boolean) as Card[];
   }
-  
-  /**
-   * Génère des cartes fictives pour le développement
-   */
+
+  private transformMediaMetadata(metadata: any): MediaMetadata {
+    if (!metadata) return {};
+
+    return {
+      title: metadata.title,
+      description: metadata.description,
+      thumbnailUrl: metadata.thumbnail_url,
+      duration: metadata.duration,
+      // YouTube
+      youtubeId: metadata.youtube_id,
+      channelTitle: metadata.channel_title,
+      // Spotify
+      spotifyId: metadata.spotify_id,
+      artistName: metadata.artist_name,
+      albumName: metadata.album_name,
+      // PDF
+      pageCount: metadata.page_count,
+      fileSize: metadata.file_size,
+      // URL Preview
+      siteName: metadata.site_name,
+      favicon: metadata.favicon,
+      ogImage: metadata.og_image
+    };
+  }
+
   private getMockCards(): Card[] {
-    console.log('Génération de cartes fictives pour le développement');
-    
     return [
       {
-        id: 'parent1',
-        title: 'Module 1: Introduction au climat',
-        description: 'Découvrez les bases du changement climatique',
-        type: 'parent',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        childCards: ['child1', 'child2', 'child3']
-      },
-      {
-        id: 'child1',
-        title: 'Qu\'est-ce que le climat?',
-        description: 'Comprendre la différence entre météo et climat',
+        id: 'media1',
+        title: 'Introduction au changement climatique',
+        description: 'Une vidéo explicative sur le changement climatique',
         type: 'media',
-        mediaType: 'video',
-        mediaUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        mediaType: 'youtube',
+        mediaUrl: 'https://www.youtube.com/watch?v=example',
+        metadata: {
+          title: 'Le changement climatique expliqué',
+          description: 'Une introduction claire au changement climatique',
+          youtubeId: 'example',
+          channelTitle: 'Science Française',
+          thumbnailUrl: 'https://example.com/thumbnail.jpg',
+          duration: 360
+        },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       },
       {
-        id: 'child2',
-        title: 'Quiz: Connaissances climatiques',
-        description: 'Testez vos connaissances',
-        type: 'qcm',
-        question: 'Quelle est la principale cause du changement climatique?',
-        options: [
-          { id: 'opt1', text: 'Les émissions de gaz à effet de serre', isCorrect: true },
-          { id: 'opt2', text: 'Les éruptions volcaniques', isCorrect: false },
-          { id: 'opt3', text: 'Les variations naturelles du climat', isCorrect: false }
-        ],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      },
-      {
-        id: 'child3',
-        title: 'Documentation PDF',
-        description: 'Ressources supplémentaires sur le climat',
+        id: 'media2',
+        title: 'Ressources sur le climat',
+        description: 'Document PDF avec des informations détaillées',
         type: 'media',
         mediaType: 'pdf',
         mediaUrl: 'https://example.com/climate.pdf',
+        metadata: {
+          title: 'Guide du climat',
+          pageCount: 25,
+          fileSize: 2048576
+        },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       }
-    ];
+    ] as Card[];
   }
-  
-  /**
-   * Interactions utilisateur-carte
-   */
+
+  // Déléguer les opérations sur les médias au service spécialisé
+  async createMediaCard(params: {
+    title: string;
+    description?: string;
+    mediaType: MediaType;
+    mediaUrl: string;
+    parentId?: string;
+  }) {
+    try {
+      // Extraire les métadonnées automatiquement
+      const metadata = await mediaService.extractMetadata(params.mediaUrl, params.mediaType);
+      return await mediaService.createMedia({
+        ...params,
+        metadata
+      });
+    } catch (error) {
+      console.error('Erreur lors de la création de la carte média:', error);
+      throw error;
+    }
+  }
+
+  async updateMediaCard(
+    cardId: string,
+    updates: {
+      title?: string;
+      description?: string;
+      mediaType?: MediaType;
+      mediaUrl?: string;
+      parentId?: string;
+    }
+  ) {
+    try {
+      let metadata;
+      if (updates.mediaUrl && updates.mediaType) {
+        metadata = await mediaService.extractMetadata(updates.mediaUrl, updates.mediaType);
+      }
+      return await mediaService.updateMedia(cardId, {
+        ...updates,
+        metadata
+      });
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour de la carte média:', error);
+      throw error;
+    }
+  }
+
   async getUserCardInteractions(userId: string): Promise<any[]> {
     try {
       const { data, error } = await supabase
@@ -192,41 +220,6 @@ class SupabaseService {
       return [];
     }
   }
-  
-  /**
-   * Enregistre une interaction utilisateur-carte
-   */
-  async saveUserCardInteraction(
-    userId: string, 
-    cardId: string, 
-    status: 'viewed' | 'completed' | 'in_progress',
-    points: { knowledge: number, behavior: number, skills: number },
-    selectedOptions?: string[]
-  ): Promise<any> {
-    try {
-      const { data, error } = await supabase
-        .from('user_card_interactions')
-        .upsert({
-          user_id: userId,
-          card_id: cardId,
-          status,
-          points_knowledge: points.knowledge,
-          points_behavior: points.behavior,
-          points_skills: points.skills,
-          selected_options: selectedOptions || [],
-          last_interaction_at: new Date().toISOString()
-        }, {
-          onConflict: 'user_id,card_id'
-        });
-        
-      if (error) throw error;
-      return data;
-    } catch (error) {
-      console.error('Erreur lors de l\'enregistrement de l\'interaction:', error);
-      throw error;
-    }
-  }
 }
 
-// Exporter une instance unique du service
-export const supabaseService = new SupabaseService(); 
+export const supabaseService = new SupabaseService();

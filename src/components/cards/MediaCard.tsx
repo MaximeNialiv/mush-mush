@@ -1,131 +1,89 @@
+import React from 'react';
 import { AccordionCard } from './AccordionCard';
-import { Play, FileText, Headphones, Youtube } from 'lucide-react';
+import { YouTubePlayer } from '../media/YouTubePlayer';
+import { PDFViewer } from '../media/PDFViewer';
+import { SpotifyPlayer } from '../media/SpotifyPlayer';
+import { URLPreview } from '../media/URLPreview';
+import { MediaCardData } from '@/types/media';
+import { FileText, Music, Link, Video } from 'lucide-react';
 
-type MediaType = 'youtube' | 'pdf' | 'podcast' | 'video';
+const MediaIcon = ({ type }: { type: string }) => {
+  switch (type) {
+    case 'youtube':
+      return <Video className="w-5 h-5 text-red-600" />;
+    case 'pdf':
+      return <FileText className="w-5 h-5 text-blue-600" />;
+    case 'spotify':
+      return <Music className="w-5 h-5 text-green-600" />;
+    default:
+      return <Link className="w-5 h-5 text-gray-600" />;
+  }
+};
 
 interface MediaCardProps {
-  title: string;
-  description?: string;
-  mediaType: MediaType;
-  mediaUrl: string;
-  points?: {
-    knowledge: { current: number; total: number; };
-    behavior: { current: number; total: number; };
-    skills: { current: number; total: number; };
-    ranking?: number;
-  };
+  card: MediaCardData;
+  onClose?: () => void;
 }
 
-const getYoutubeEmbedUrl = (url: string) => {
-  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-  const match = url.match(regExp);
-  return match && match[2].length === 11
-    ? `https://www.youtube.com/embed/${match[2]}`
-    : url;
-};
+export const MediaCard: React.FC<MediaCardProps> = ({ card, onClose }) => {
+  const { title, description, mediaType, mediaUrl, metadata } = card;
 
-const MediaContent = ({ type, url }: { type: MediaType; url: string }) => {
-  switch (type) {
-    case 'youtube':
-      return (
-        <div className="relative pb-[56.25%] h-0 rounded-lg overflow-hidden">
-          <iframe
-            src={getYoutubeEmbedUrl(url)}
-            className="absolute top-0 left-0 w-full h-full"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            loading="lazy"
-            referrerPolicy="no-referrer"
-            sandbox="allow-same-origin allow-scripts allow-popups allow-presentation"
-          />
-        </div>
-      );
-    
-    case 'pdf':
-      return (
-        <div className="relative pb-[141%] h-0 rounded-lg overflow-hidden">
-          <iframe
-            src={url}
-            className="absolute top-0 left-0 w-full h-full"
-            loading="lazy"
-            referrerPolicy="no-referrer"
-            sandbox="allow-same-origin allow-scripts allow-popups allow-presentation"
-          />
-        </div>
-      );
-    
-    case 'podcast':
-      return (
-        <div className="relative pb-[56.25%] h-0 rounded-lg overflow-hidden">
-          <iframe
-            src={url}
-            className="absolute top-0 left-0 w-full h-full"
-            loading="lazy"
-            referrerPolicy="no-referrer"
-            sandbox="allow-same-origin allow-scripts allow-popups allow-presentation"
-            allow="autoplay"
-          />
-        </div>
-      );
-    
-    case 'video':
-      return (
-        <div className="relative pb-[56.25%] h-0 rounded-lg overflow-hidden">
-          <iframe
-            src={url}
-            className="absolute top-0 left-0 w-full h-full"
-            loading="lazy"
-            referrerPolicy="no-referrer"
-            sandbox="allow-same-origin allow-scripts allow-popups allow-presentation"
-            allow="autoplay; fullscreen"
-          />
-        </div>
-      );
-    
-    default:
-      return null;
-  }
-};
+  const renderMedia = () => {
+    switch (mediaType) {
+      case 'youtube':
+        return <YouTubePlayer url={mediaUrl} metadata={metadata} />;
+      case 'pdf':
+        return <PDFViewer url={mediaUrl} metadata={metadata} />;
+      case 'spotify':
+        return <SpotifyPlayer url={mediaUrl} metadata={metadata} />;
+      case 'url_preview':
+        return <URLPreview url={mediaUrl} metadata={metadata} />;
+      default:
+        return (
+          <div className="flex items-center justify-center h-48 bg-gray-100 rounded-lg">
+            <p className="text-sm text-gray-500">Type de média non supporté</p>
+          </div>
+        );
+    }
+  };
 
-const MediaIcon = ({ type }: { type: MediaType }) => {
-  switch (type) {
-    case 'youtube':
-      return <Youtube className="w-6 h-6 text-red-600" />;
-    case 'pdf':
-      return <FileText className="w-6 h-6 text-blue-600" />;
-    case 'podcast':
-      return <Headphones className="w-6 h-6 text-purple-600" />;
-    case 'video':
-      return <Play className="w-6 h-6 text-green-600" />;
-    default:
-      return null;
-  }
-};
-
-export const MediaCard = ({ 
-  title,
-  description,
-  mediaType,
-  mediaUrl,
-  points
-}: MediaCardProps) => {
   return (
     <AccordionCard 
       title={title}
-      points={points}
+      onClose={onClose}
     >
       <div className="space-y-4">
-        {description && (
-          <div className="flex items-start gap-3">
+        {(description || metadata?.description) && (
+          <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg">
             <MediaIcon type={mediaType} />
-            <p className="text-sm text-gray-600">{description}</p>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm text-gray-600">
+                {description || metadata.description}
+              </p>
+              {metadata?.channelTitle && (
+                <p className="mt-1 text-xs text-gray-500">
+                  Par {metadata.channelTitle}
+                </p>
+              )}
+              {metadata?.artistName && (
+                <p className="mt-1 text-xs text-gray-500">
+                  {metadata.artistName} {metadata.albumName && `• ${metadata.albumName}`}
+                </p>
+              )}
+              {metadata?.pageCount && (
+                <p className="mt-1 text-xs text-gray-500">
+                  {metadata.pageCount} pages
+                  {metadata.fileSize && ` • ${(metadata.fileSize / 1024 / 1024).toFixed(1)} MB`}
+                </p>
+              )}
+            </div>
           </div>
         )}
         
-        <div className="border rounded-lg overflow-hidden">
-          <MediaContent type={mediaType} url={mediaUrl} />
+        <div className="overflow-hidden rounded-lg border bg-white">
+          {renderMedia()}
         </div>
       </div>
     </AccordionCard>
   );
-}; 
+};
