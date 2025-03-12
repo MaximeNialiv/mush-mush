@@ -12,26 +12,42 @@ CREATE TABLE IF NOT EXISTS card_relationships (
 ALTER TABLE card_relationships ENABLE ROW LEVEL SECURITY;
 
 -- Créer les politiques RLS
-CREATE POLICY "Enable read access for all users" ON card_relationships
-FOR SELECT
-TO public
-USING (true);
+DO $$ BEGIN
+    CREATE POLICY "Enable read access for all users" ON card_relationships
+    FOR SELECT
+    TO public
+    USING (true);
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
-CREATE POLICY "Enable insert for authenticated users only" ON card_relationships
-FOR INSERT
-TO authenticated
-WITH CHECK (true);
+DO $$ BEGIN
+    CREATE POLICY "Enable insert for authenticated users only" ON card_relationships
+    FOR INSERT
+    TO authenticated
+    WITH CHECK (true);
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
-CREATE POLICY "Enable update for authenticated users only" ON card_relationships
-FOR UPDATE
-TO authenticated
-USING (true)
-WITH CHECK (true);
+DO $$ BEGIN
+    CREATE POLICY "Enable update for authenticated users only" ON card_relationships
+    FOR UPDATE
+    TO authenticated
+    USING (true)
+    WITH CHECK (true);
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
-CREATE POLICY "Enable delete for authenticated users only" ON card_relationships
-FOR DELETE
-TO authenticated
-USING (true);
+DO $$ BEGIN
+    CREATE POLICY "Enable delete for authenticated users only" ON card_relationships
+    FOR DELETE
+    TO authenticated
+    USING (true);
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
 -- Créer un trigger pour mettre à jour updated_at
 CREATE OR REPLACE FUNCTION update_updated_at_column()
