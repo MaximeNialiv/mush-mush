@@ -91,8 +91,8 @@ export const useCardsStore = create<CardsState>((set, get) => ({
     const { cards, selectedParentId } = get();
     
     if (!selectedParentId) {
-      // Afficher les cartes racines (parent_id = '00000')
-      return cards.filter(card => card.parent_id === '00000');
+      // Afficher les cartes racines (parent_id = '00000' ou '00100')
+      return cards.filter(card => card.parent_id === '00000' || card.parent_id === '00100');
     }
 
     // Afficher les cartes enfants du parent sélectionné
