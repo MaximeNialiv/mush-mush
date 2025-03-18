@@ -1,9 +1,6 @@
 {
   "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
+    { "source": "/(.*)", "destination": "/" }
   ],
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
@@ -36,4 +33,4 @@
       ]
     }
   ]
-} 
+}
