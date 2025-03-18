@@ -1,15 +1,16 @@
 import { create } from 'zustand';
 import { Card } from '@/types/card';
+import { Id } from '@/types/database';
 import { supabaseService } from '@/services/supabase';
 
 interface CardsState {
   cards: Card[];
-  navigationHistory: string[];
-  selectedParentId: string | null;
+  navigationHistory: Id[];
+  selectedParentId: Id | null;
   isLoading: boolean;
   error: string | null;
   setCards: (cards: Card[]) => void;
-  selectParent: (parentId: string | null) => void;
+  selectParent: (parentId: Id | null) => void;
   getParentCard: () => Card | null;
   getFilteredCards: () => Card[];
   getTotalPoints: () => {
@@ -22,12 +23,22 @@ interface CardsState {
 }
 
 const calculateTotalPoints = (cards: Card[]) => {
-  // Pour cette version, nous allons simuler les points
-  return {
-    knowledge: { current: 10, total: 20 },
-    behavior: { current: 5, total: 15 },
-    skills: { current: 15, total: 30 }
+  const points = {
+    knowledge: { current: 0, total: 0 },
+    behavior: { current: 0, total: 0 },
+    skills: { current: 0, total: 0 }
   };
+
+  cards.forEach(card => {
+    // Pour l'instant, on attribue des points fixes par type de carte
+    if (card.type === 'quiz') {
+      points.knowledge.total += 2;
+      points.behavior.total += 1;
+      points.skills.total += 1;
+    }
+  });
+
+  return points;
 };
 
 export const useCardsStore = create<CardsState>((set, get) => ({
@@ -69,31 +80,26 @@ export const useCardsStore = create<CardsState>((set, get) => ({
   
   getParentCard: () => {
     const { cards, selectedParentId } = get();
-    const parentCard = selectedParentId ? cards.find(card => card.id === selectedParentId) : null;
+    if (!selectedParentId) return null;
+    
+    const parentCard = cards.find(card => card.id === selectedParentId);
     console.log('Getting parent card:', parentCard);
     return parentCard;
   },
   
   getFilteredCards: () => {
     const { cards, selectedParentId } = get();
-    let relevantCards: Card[] = [];
     
-    if (selectedParentId) {
-      // Trouver la carte parent
-      const parentCard = cards.find(card => card.id === selectedParentId);
-      if (parentCard && parentCard.type === 'parent') {
-        // Filtrer les cartes enfants basées sur les IDs stockés dans childCards
-        relevantCards = cards.filter(card => 
-          (parentCard as any).childCards.includes(card.id)
-        );
-      }
-    } else {
-      // Au niveau racine, ne montrer que les cartes de type 'parent'
-      relevantCards = cards.filter(card => card.type === 'parent');
+    if (!selectedParentId) {
+      // Afficher les cartes racines (parent_id = '00000')
+      return cards.filter(card => card.parent_id === '00000');
     }
+
+    // Afficher les cartes enfants du parent sélectionné
+    const filteredCards = cards.filter(card => card.parent_id === selectedParentId);
     
-    console.log('Getting filtered cards:', relevantCards);
-    return relevantCards;
+    console.log('Getting filtered cards:', filteredCards);
+    return filteredCards;
   },
 
   getTotalPoints: () => {
