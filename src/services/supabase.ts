@@ -1,232 +1,314 @@
-import { createClient } from '@supabase/supabase-js';
-import { Card, QCMCard, MediaCard, ParentCard } from '@/types/card';
+import { Card, Id } from '@/types/database';
+import { supabase } from '@/lib/supabaseClient';
 
-// Initialisation du client Supabase
-// Ces URL et clé devront être définies dans votre fichier .env
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
-
-if (!supabaseUrl || !supabaseKey) {
-  console.error('Les variables d\'environnement Supabase ne sont pas définies');
-}
-
-const supabase = createClient(supabaseUrl, supabaseKey);
-
-/**
- * Service pour interagir avec Supabase
- */
 class SupabaseService {
-  /**
-   * Récupère toutes les cartes
-   */
+  async insertTestCards() {
+    try {
+      // Créer la carte parent "Panel de test"
+      const { data: parentCard, error: parentError } = await supabase
+        .from('cards')
+        .insert([{
+          id: '00400',
+          title: 'Panel de test',
+          description: 'Un panel de cartes pour tester les différents types de contenu',
+          parent_id: '00000',
+          owner: 'fabienlopez69@gmail.com'
+        }])
+        .select()
+        .single();
+
+      if (parentError) throw parentError;
+      console.log('Carte parent créée:', parentCard);
+
+      // Créer les cartes enfants avec différents types de contenu
+      const childCards = [
+        {
+          id: '00401',
+          title: 'Test Quiz',
+          description: 'Un exemple de quiz interactif',
+          parent_id: '00400',
+          owner: 'fabienlopez69@gmail.com',
+          content: {
+            type: 'quiz',
+            questions: [
+              {
+                text: "Quelle est la capitale de la France ?",
+                options: [
+                  { text: "Paris", isCorrect: true, explanation: "Correct ! Paris est la capitale de la France depuis 508." },
+                  { text: "Lyon", isCorrect: false, explanation: "Lyon est la 3ème plus grande ville de France." },
+                  { text: "Marseille", isCorrect: false, explanation: "Marseille est la 2ème plus grande ville de France." }
+                ]
+              },
+              {
+                text: "Quel est l'arbre emblématique de la Canada ?",
+                options: [
+                  { text: "Le pin", isCorrect: false, explanation: "Le pin est commun au Canada mais n'est pas l'arbre emblématique." },
+                  { text: "L'érable", isCorrect: true, explanation: "L'érable est l'emblème du Canada, présent sur son drapeau." },
+                  { text: "Le chêne", isCorrect: false, explanation: "Le chêne n'est pas particulièrement associé au Canada." }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          id: '00402',
+          title: 'Test YouTube',
+          description: 'Une vidéo YouTube sur la nature',
+          parent_id: '00400',
+          owner: 'fabienlopez69@gmail.com',
+          content: {
+            type: 'youtube',
+            url: 'https://www.youtube.com/watch?v=6v2L2UGZJAM'
+          }
+        },
+        {
+          id: '00403',
+          title: 'Test Spotify',
+          description: 'Une playlist de musique relaxante',
+          parent_id: '00400',
+          owner: 'fabienlopez69@gmail.com',
+          content: {
+            type: 'spotify',
+            url: 'https://open.spotify.com/embed/playlist/37i9dQZF1DWZqd5JICZI0u'
+          }
+        },
+        {
+          id: '00404',
+          title: 'Test URL',
+          description: 'Un article intéressant sur le développement durable',
+          parent_id: '00400',
+          owner: 'fabienlopez69@gmail.com',
+          content: {
+            type: 'url',
+            url: 'https://www.nationalgeographic.com/environment/article/sustainable-earth'
+          }
+        }
+      ];
+
+      for (const card of childCards) {
+        const { data, error } = await supabase
+          .from('cards')
+          .insert([{
+            ...card,
+            content: JSON.stringify(card.content)
+          }])
+          .select()
+          .single();
+
+        if (error) throw error;
+        console.log(`Carte enfant créée: ${card.title}`, data);
+      }
+
+      console.log('Toutes les cartes ont été créées avec succès !');
+      return true;
+    } catch (error) {
+      console.error('Erreur lors de la création des cartes:', error);
+      return false;
+    }
+  }
+
   async getAllCards(): Promise<Card[]> {
     try {
       console.log('Récupération des cartes depuis Supabase...');
       
       // Récupérer toutes les cartes
-      const { data: cards, error } = await supabase
+      const { data: cards, error: cardsError } = await supabase
         .from('cards')
         .select('*');
+      
+      console.log('Cartes récupérées:', cards?.length || 0);
+      if (cards && cards.length > 0) {
+        console.log('Exemple de carte brute:', cards[0]);
+      }
         
-      if (error) throw error;
+      if (cardsError) {
+        console.error('Erreur lors de la récupération des cartes:', cardsError);
+        throw cardsError;
+      }
       
       if (!cards || cards.length === 0) {
-        console.log('Aucune carte trouvée, utilisation de données fictives');
-        return this.getMockCards();
+        console.log('Aucune carte trouvée');
+        return [];
       }
-      
-      console.log(`${cards.length} cartes récupérées`);
-      
-      // Récupérer les options pour les cartes QCM
-      const qcmCards = cards.filter(card => card.type === 'qcm');
-      if (qcmCards.length > 0) {
-        const qcmIds = qcmCards.map(card => card.id);
-        const { data: options, error: optionsError } = await supabase
-          .from('quiz_options')
-          .select('*')
-          .in('card_id', qcmIds);
-          
-        if (optionsError) throw optionsError;
+
+      // Convertir les contenus JSON en objets
+      const processedCards = cards.map(card => {
+        // Créer une copie de la carte pour éviter de modifier l'original
+        const processedCard = { ...card };
         
-        if (options) {
-          qcmCards.forEach(card => {
-            card.options = options.filter(option => option.card_id === card.id);
-          });
+        // Traiter le contenu s'il existe et est une chaîne
+        if (processedCard.content && typeof processedCard.content === 'string') {
+          try {
+            const parsedContent = JSON.parse(processedCard.content);
+            if (
+              typeof parsedContent === 'object' &&
+              parsedContent !== null &&
+              'type' in parsedContent &&
+              (
+                (parsedContent.type === 'quiz' && 'questions' in parsedContent) ||
+                ((parsedContent.type === 'youtube' || parsedContent.type === 'spotify' || parsedContent.type === 'url') && 'url' in parsedContent)
+              )
+            ) {
+              processedCard.content = parsedContent;
+            } else {
+              console.log('Format de contenu non standard pour la carte:', processedCard.id);
+              // Garder le contenu tel quel
+            }
+          } catch (e) {
+            console.log('Contenu non JSON pour la carte:', processedCard.id);
+            // Garder le contenu tel quel
+          }
         }
+        
+        return processedCard;
+      });
+
+      console.log('Traitement des cartes terminé');
+      if (processedCards.length > 0) {
+        console.log('Exemple de carte traitée:', processedCards[0]);
       }
       
-      // Récupérer les relations parent-enfant pour les cartes parent
-      const parentCards = cards.filter(card => card.type === 'parent');
-      if (parentCards.length > 0) {
-        parentCards.forEach(parentCard => {
-          parentCard.childCards = cards
-            .filter(card => card.parent_id === parentCard.id)
-            .map(card => card.id);
-        });
-      }
-      
-      // Transformer les données de Supabase en type Card
-      return this.transformCards(cards);
+      return processedCards;
     } catch (error) {
       console.error('Erreur lors de la récupération des cartes:', error);
-      return this.getMockCards();
-    }
-  }
-  
-  /**
-   * Transforme les données Supabase en types de l'application
-   */
-  private transformCards(supabaseCards: any[]): Card[] {
-    return supabaseCards.map(card => {
-      const baseCard = {
-        id: card.id,
-        title: card.title,
-        description: card.description,
-        createdAt: card.created_at,
-        updatedAt: card.updated_at
-      };
-      
-      switch (card.type) {
-        case 'qcm':
-          return {
-            ...baseCard,
-            type: 'qcm',
-            question: card.question,
-            options: (card.options || []).map((opt: any) => ({
-              id: opt.id,
-              text: opt.text,
-              isCorrect: opt.is_correct
-            }))
-          } as QCMCard;
-          
-        case 'media':
-          return {
-            ...baseCard,
-            type: 'media',
-            mediaType: card.media_type,
-            mediaUrl: card.media_url,
-            thumbnailUrl: card.thumbnail_url
-          } as MediaCard;
-          
-        case 'parent':
-          return {
-            ...baseCard,
-            type: 'parent',
-            childCards: card.childCards || []
-          } as ParentCard;
-          
-        default:
-          console.error('Type de carte inconnu:', card.type);
-          return null;
-      }
-    }).filter(Boolean) as Card[];
-  }
-  
-  /**
-   * Génère des cartes fictives pour le développement
-   */
-  private getMockCards(): Card[] {
-    console.log('Génération de cartes fictives pour le développement');
-    
-    return [
-      {
-        id: 'parent1',
-        title: 'Module 1: Introduction au climat',
-        description: 'Découvrez les bases du changement climatique',
-        type: 'parent',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        childCards: ['child1', 'child2', 'child3']
-      },
-      {
-        id: 'child1',
-        title: 'Qu\'est-ce que le climat?',
-        description: 'Comprendre la différence entre météo et climat',
-        type: 'media',
-        mediaType: 'video',
-        mediaUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      },
-      {
-        id: 'child2',
-        title: 'Quiz: Connaissances climatiques',
-        description: 'Testez vos connaissances',
-        type: 'qcm',
-        question: 'Quelle est la principale cause du changement climatique?',
-        options: [
-          { id: 'opt1', text: 'Les émissions de gaz à effet de serre', isCorrect: true },
-          { id: 'opt2', text: 'Les éruptions volcaniques', isCorrect: false },
-          { id: 'opt3', text: 'Les variations naturelles du climat', isCorrect: false }
-        ],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      },
-      {
-        id: 'child3',
-        title: 'Documentation PDF',
-        description: 'Ressources supplémentaires sur le climat',
-        type: 'media',
-        mediaType: 'pdf',
-        mediaUrl: 'https://example.com/climate.pdf',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      }
-    ];
-  }
-  
-  /**
-   * Interactions utilisateur-carte
-   */
-  async getUserCardInteractions(userId: string): Promise<any[]> {
-    try {
-      const { data, error } = await supabase
-        .from('user_card_interactions')
-        .select('*')
-        .eq('user_id', userId);
-        
-      if (error) throw error;
-      return data || [];
-    } catch (error) {
-      console.error('Erreur lors de la récupération des interactions:', error);
       return [];
     }
   }
-  
-  /**
-   * Enregistre une interaction utilisateur-carte
-   */
-  async saveUserCardInteraction(
-    userId: string, 
-    cardId: string, 
-    status: 'viewed' | 'completed' | 'in_progress',
-    points: { knowledge: number, behavior: number, skills: number },
-    selectedOptions?: string[]
-  ): Promise<any> {
+
+
+
+  // Créer une nouvelle carte avec contenu
+  async createCard(params: {
+    title: string;
+    description?: string;
+    parent_id?: Id;
+    owner: string;
+    content?: {
+      type: 'quiz';
+      questions: Array<{
+        text: string;
+        options: Array<{
+          text: string;
+          isCorrect: boolean;
+          explanation?: string;
+        }>;
+      }>;
+    } | {
+      type: 'youtube' | 'spotify' | 'url';
+      url: string;
+    };
+  }) {
     try {
-      const { data, error } = await supabase
-        .from('user_card_interactions')
-        .upsert({
-          user_id: userId,
-          card_id: cardId,
-          status,
-          points_knowledge: points.knowledge,
-          points_behavior: points.behavior,
-          points_skills: points.skills,
-          selected_options: selectedOptions || [],
-          last_interaction_at: new Date().toISOString()
-        }, {
-          onConflict: 'user_id,card_id'
-        });
+      // Créer la carte avec le contenu JSON
+      const { data: card, error: cardError } = await supabase
+        .from('cards')
+        .insert([{
+          title: params.title,
+          description: params.description,
+          parent_id: params.parent_id,
+          owner: params.owner,
+          content: params.content ? JSON.stringify(params.content) : null
+        }])
+        .select()
+        .single();
         
-      if (error) throw error;
-      return data;
+      if (cardError) throw cardError;
+      
+      return {
+        ...card,
+        content: params.content
+      };
     } catch (error) {
-      console.error('Erreur lors de l\'enregistrement de l\'interaction:', error);
+      console.error('Erreur lors de la création de la carte:', error);
       throw error;
+    }
+  }
+
+  // Mettre à jour une carte existante
+  async updateCard(
+    cardId: Id,
+    updates: {
+      title?: string;
+      description?: string;
+      parent_id?: Id;
+      content?: {
+        type: 'quiz';
+        questions: Array<{
+          text: string;
+          options: Array<{
+            text: string;
+            isCorrect: boolean;
+            explanation?: string;
+          }>;
+        }>;
+      } | {
+        type: 'youtube' | 'spotify' | 'url';
+        url: string;
+      };
+    }
+  ) {
+    try {
+      // Mettre à jour la carte
+      const cardUpdates: Partial<Card> & { content?: string } = {};
+      if (updates.title) cardUpdates.title = updates.title;
+      if (updates.description) cardUpdates.description = updates.description;
+      if (updates.parent_id) cardUpdates.parent_id = updates.parent_id;
+      if (updates.content) cardUpdates.content = JSON.stringify(updates.content);
+      
+      const { data: card, error: cardError } = await supabase
+        .from('cards')
+        .update(cardUpdates)
+        .eq('id', cardId)
+        .select()
+        .single();
+        
+      if (cardError) throw cardError;
+      
+      return {
+        ...card,
+        content: updates.content
+      };
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour de la carte:', error);
+      throw error;
+    }
+  }
+
+
+  // Récupérer toutes les cartes racines (avec parent_id = null)
+  async getRootCards(): Promise<Card[]> {
+    try {
+      console.log('Récupération des cartes racines...');
+      
+      // Récupérer les cartes racines (parent_id = null)
+      const { data: rootCards, error: rootError } = await supabase
+        .from('cards')
+        .select('id, title, description, parent_id, owner, content')
+        .is('parent_id', null);
+
+      if (rootError) {
+        console.error('Erreur lors de la récupération des cartes racines:', rootError);
+        throw rootError;
+      }
+
+      if (!rootCards || rootCards.length === 0) {
+        console.log('Aucune carte racine trouvée');
+        return [];
+      }
+
+      // Convertir les contenus JSON en objets
+      const processedCards = rootCards.map(card => ({
+        ...card,
+        content: card.content ? JSON.parse(card.content) : null
+      }));
+
+      console.log('Cartes racines récupérées:', processedCards);
+      return processedCards;
+    } catch (error) {
+      console.error('Erreur lors de la récupération des cartes racines:', error);
+      return [];
     }
   }
 }
 
-// Exporter une instance unique du service
-export const supabaseService = new SupabaseService(); 
+export const supabaseService = new SupabaseService();

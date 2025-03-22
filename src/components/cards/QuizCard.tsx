@@ -175,18 +175,53 @@ export const QuizCard = ({
         )}
 
         {isSubmitted && (
-          <div className={cn(
-            "p-4 rounded-lg",
-            points.knowledge.current === points.knowledge.total
-              ? "bg-green-50 border border-green-200"
-              : "bg-red-50 border border-red-200"
-          )}>
-            <p className="font-medium">
-              {points.knowledge.current === points.knowledge.total
-                ? `Bravo ! C'est la bonne réponse ! 🎉 Tu as gagné ${points.knowledge.current} points de chaque type !`
-                : `Tu as obtenu ${points.knowledge.current} points sur ${points.knowledge.total} possibles. Continue comme ça ! 💪`}
-            </p>
-          </div>
+          <>
+            <div className={cn(
+              "p-4 rounded-lg mb-4",
+              points.knowledge.current === points.knowledge.total
+                ? "bg-green-50 border border-green-200"
+                : "bg-red-50 border border-red-200"
+            )}>
+              <p className="font-medium">
+                {points.knowledge.current === points.knowledge.total
+                  ? `Bravo ! C'est la bonne réponse ! 🎉 Tu as gagné ${points.knowledge.current} points !`
+                  : `Tu as obtenu ${points.knowledge.current} points sur ${points.knowledge.total} possibles. Continue comme ça ! 💪`}
+              </p>
+              <p className="text-sm text-gray-600 mt-2">
+                Note : Seules les cartes Quiz permettent de gagner des points.
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <h3 className="font-medium text-lg">Explications détaillées :</h3>
+              {options.map((option) => {
+                const isSelected = selectedOptions.has(option.id);
+                if (option.explanation) {
+                  return (
+                    <div key={`explanation-${option.id}`} className={cn(
+                      "p-4 rounded-lg",
+                      option.isCorrect ? "bg-green-50 border border-green-200" : 
+                      isSelected && !option.isCorrect ? "bg-red-50 border border-red-200" :
+                      "bg-gray-50 border border-gray-200"
+                    )}>
+                      <div className="flex items-start gap-2">
+                        {option.isCorrect ? (
+                          <Check className="w-5 h-5 text-green-600 mt-1" />
+                        ) : isSelected && !option.isCorrect ? (
+                          <X className="w-5 h-5 text-red-600 mt-1" />
+                        ) : null}
+                        <div>
+                          <p className="font-medium mb-2">{option.text}</p>
+                          <p className="text-sm text-gray-700">{option.explanation}</p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+                return null;
+              })}
+            </div>
+          </>
         )}
       </div>
     </AccordionCard>
