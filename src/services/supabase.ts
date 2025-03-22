@@ -1,15 +1,125 @@
-import { Card, QuizOption, Id } from '@/types/database';
+import { Card, Id } from '@/types/database';
 import { supabase } from '@/lib/supabaseClient';
 
 class SupabaseService {
+  async insertTestCards() {
+    try {
+      // Créer la carte parent "Panel de test"
+      const { data: parentCard, error: parentError } = await supabase
+        .from('cards')
+        .insert([{
+          id: '00400',
+          title: 'Panel de test',
+          description: 'Un panel de cartes pour tester les différents types de contenu',
+          parent_id: '00000',
+          owner: 'fabienlopez69@gmail.com'
+        }])
+        .select()
+        .single();
+
+      if (parentError) throw parentError;
+      console.log('Carte parent créée:', parentCard);
+
+      // Créer les cartes enfants avec différents types de contenu
+      const childCards = [
+        {
+          id: '00401',
+          title: 'Test Quiz',
+          description: 'Un exemple de quiz interactif',
+          parent_id: '00400',
+          owner: 'fabienlopez69@gmail.com',
+          content: {
+            type: 'quiz',
+            questions: [
+              {
+                text: "Quelle est la capitale de la France ?",
+                options: [
+                  { text: "Paris", isCorrect: true, explanation: "Correct ! Paris est la capitale de la France depuis 508." },
+                  { text: "Lyon", isCorrect: false, explanation: "Lyon est la 3ème plus grande ville de France." },
+                  { text: "Marseille", isCorrect: false, explanation: "Marseille est la 2ème plus grande ville de France." }
+                ]
+              },
+              {
+                text: "Quel est l'arbre emblématique de la Canada ?",
+                options: [
+                  { text: "Le pin", isCorrect: false, explanation: "Le pin est commun au Canada mais n'est pas l'arbre emblématique." },
+                  { text: "L'érable", isCorrect: true, explanation: "L'érable est l'emblème du Canada, présent sur son drapeau." },
+                  { text: "Le chêne", isCorrect: false, explanation: "Le chêne n'est pas particulièrement associé au Canada." }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          id: '00402',
+          title: 'Test YouTube',
+          description: 'Une vidéo YouTube sur la nature',
+          parent_id: '00400',
+          owner: 'fabienlopez69@gmail.com',
+          content: {
+            type: 'youtube',
+            url: 'https://www.youtube.com/watch?v=6v2L2UGZJAM'
+          }
+        },
+        {
+          id: '00403',
+          title: 'Test Spotify',
+          description: 'Une playlist de musique relaxante',
+          parent_id: '00400',
+          owner: 'fabienlopez69@gmail.com',
+          content: {
+            type: 'spotify',
+            url: 'https://open.spotify.com/embed/playlist/37i9dQZF1DWZqd5JICZI0u'
+          }
+        },
+        {
+          id: '00404',
+          title: 'Test URL',
+          description: 'Un article intéressant sur le développement durable',
+          parent_id: '00400',
+          owner: 'fabienlopez69@gmail.com',
+          content: {
+            type: 'url',
+            url: 'https://www.nationalgeographic.com/environment/article/sustainable-earth'
+          }
+        }
+      ];
+
+      for (const card of childCards) {
+        const { data, error } = await supabase
+          .from('cards')
+          .insert([{
+            ...card,
+            content: JSON.stringify(card.content)
+          }])
+          .select()
+          .single();
+
+        if (error) throw error;
+        console.log(`Carte enfant créée: ${card.title}`, data);
+      }
+
+      console.log('Toutes les cartes ont été créées avec succès !');
+      return true;
+    } catch (error) {
+      console.error('Erreur lors de la création des cartes:', error);
+      return false;
+    }
+  }
+
   async getAllCards(): Promise<Card[]> {
     try {
       console.log('Récupération des cartes depuis Supabase...');
       
-      // Récupérer toutes les cartes avec leurs options de quiz
+      // Récupérer toutes les cartes
       const { data: cards, error: cardsError } = await supabase
         .from('cards')
-        .select('*, quiz_options(*)');
+        .select('*');
+      
+      console.log('Cartes récupérées:', cards?.length || 0);
+      if (cards && cards.length > 0) {
+        console.log('Exemple de carte brute:', cards[0]);
+      }
         
       if (cardsError) {
         console.error('Erreur lors de la récupération des cartes:', cardsError);
@@ -21,8 +131,44 @@ class SupabaseService {
         return [];
       }
 
-      console.log('Cartes récupérées:', cards);
-      return cards;
+      // Convertir les contenus JSON en objets
+      const processedCards = cards.map(card => {
+        // Créer une copie de la carte pour éviter de modifier l'original
+        const processedCard = { ...card };
+        
+        // Traiter le contenu s'il existe et est une chaîne
+        if (processedCard.content && typeof processedCard.content === 'string') {
+          try {
+            const parsedContent = JSON.parse(processedCard.content);
+            if (
+              typeof parsedContent === 'object' &&
+              parsedContent !== null &&
+              'type' in parsedContent &&
+              (
+                (parsedContent.type === 'quiz' && 'questions' in parsedContent) ||
+                ((parsedContent.type === 'youtube' || parsedContent.type === 'spotify' || parsedContent.type === 'url') && 'url' in parsedContent)
+              )
+            ) {
+              processedCard.content = parsedContent;
+            } else {
+              console.log('Format de contenu non standard pour la carte:', processedCard.id);
+              // Garder le contenu tel quel
+            }
+          } catch (e) {
+            console.log('Contenu non JSON pour la carte:', processedCard.id);
+            // Garder le contenu tel quel
+          }
+        }
+        
+        return processedCard;
+      });
+
+      console.log('Traitement des cartes terminé');
+      if (processedCards.length > 0) {
+        console.log('Exemple de carte traitée:', processedCards[0]);
+      }
+      
+      return processedCards;
     } catch (error) {
       console.error('Erreur lors de la récupération des cartes:', error);
       return [];
@@ -34,43 +180,44 @@ class SupabaseService {
   // Créer une nouvelle carte avec contenu
   async createCard(params: {
     title: string;
+    description?: string;
     parent_id?: Id;
-    type: 'quiz';
-    question: string;
     owner: string;
-    options: Array<{ text: string; is_correct: boolean; }>;
+    content?: {
+      type: 'quiz';
+      questions: Array<{
+        text: string;
+        options: Array<{
+          text: string;
+          isCorrect: boolean;
+          explanation?: string;
+        }>;
+      }>;
+    } | {
+      type: 'youtube' | 'spotify' | 'url';
+      url: string;
+    };
   }) {
     try {
-      // Créer la carte
+      // Créer la carte avec le contenu JSON
       const { data: card, error: cardError } = await supabase
         .from('cards')
         .insert([{
           title: params.title,
+          description: params.description,
           parent_id: params.parent_id,
-          type: params.type,
-          question: params.question,
-          owner: params.owner
+          owner: params.owner,
+          content: params.content ? JSON.stringify(params.content) : null
         }])
         .select()
         .single();
         
       if (cardError) throw cardError;
       
-      // Créer les options de quiz
-      const { data: options, error: optionsError } = await supabase
-        .from('quiz_options')
-        .insert(
-          params.options.map(option => ({
-            card_id: card.id,
-            text: option.text,
-            is_correct: option.is_correct
-          }))
-        )
-        .select();
-        
-      if (optionsError) throw optionsError;
-      
-      return { ...card, quiz_options: options };
+      return {
+        ...card,
+        content: params.content
+      };
     } catch (error) {
       console.error('Erreur lors de la création de la carte:', error);
       throw error;
@@ -82,17 +229,31 @@ class SupabaseService {
     cardId: Id,
     updates: {
       title?: string;
+      description?: string;
       parent_id?: Id;
-      question?: string;
-      options?: Array<{ id: Id; text: string; is_correct: boolean; }>;
+      content?: {
+        type: 'quiz';
+        questions: Array<{
+          text: string;
+          options: Array<{
+            text: string;
+            isCorrect: boolean;
+            explanation?: string;
+          }>;
+        }>;
+      } | {
+        type: 'youtube' | 'spotify' | 'url';
+        url: string;
+      };
     }
   ) {
     try {
       // Mettre à jour la carte
-      const cardUpdates: Partial<Card> = {};
+      const cardUpdates: Partial<Card> & { content?: string } = {};
       if (updates.title) cardUpdates.title = updates.title;
+      if (updates.description) cardUpdates.description = updates.description;
       if (updates.parent_id) cardUpdates.parent_id = updates.parent_id;
-      if (updates.question) cardUpdates.question = updates.question;
+      if (updates.content) cardUpdates.content = JSON.stringify(updates.content);
       
       const { data: card, error: cardError } = await supabase
         .from('cards')
@@ -103,29 +264,10 @@ class SupabaseService {
         
       if (cardError) throw cardError;
       
-      // Mettre à jour les options si nécessaire
-      if (updates.options) {
-        const { error: optionsError } = await supabase
-          .from('quiz_options')
-          .upsert(
-            updates.options.map(option => ({
-              id: option.id,
-              card_id: cardId,
-              text: option.text,
-              is_correct: option.is_correct
-            }))
-          );
-          
-        if (optionsError) throw optionsError;
-      }
-      
-      // Récupérer les options mises à jour
-      const { data: options } = await supabase
-        .from('quiz_options')
-        .select('*')
-        .eq('card_id', card.id);
-        
-      return { ...card, quiz_options: options };
+      return {
+        ...card,
+        content: updates.content
+      };
     } catch (error) {
       console.error('Erreur lors de la mise à jour de la carte:', error);
       throw error;
@@ -133,27 +275,35 @@ class SupabaseService {
   }
 
 
-  // Récupérer toutes les cartes racines (avec parent_id = '00000')
+  // Récupérer toutes les cartes racines (avec parent_id = null)
   async getRootCards(): Promise<Card[]> {
     try {
       console.log('Récupération des cartes racines...');
-      const { data: cards, error: cardsError } = await supabase
+      
+      // Récupérer les cartes racines (parent_id = null)
+      const { data: rootCards, error: rootError } = await supabase
         .from('cards')
-        .select('*, quiz_options(*)')
-        .or('parent_id.eq.00000,parent_id.eq.00100');
+        .select('id, title, description, parent_id, owner, content')
+        .is('parent_id', null);
 
-      if (cardsError) {
-        console.error('Erreur lors de la récupération des cartes racines:', cardsError);
-        throw cardsError;
+      if (rootError) {
+        console.error('Erreur lors de la récupération des cartes racines:', rootError);
+        throw rootError;
       }
 
-      if (!cards || cards.length === 0) {
+      if (!rootCards || rootCards.length === 0) {
         console.log('Aucune carte racine trouvée');
         return [];
       }
 
-      console.log('Cartes racines récupérées:', cards);
-      return cards;
+      // Convertir les contenus JSON en objets
+      const processedCards = rootCards.map(card => ({
+        ...card,
+        content: card.content ? JSON.parse(card.content) : null
+      }));
+
+      console.log('Cartes racines récupérées:', processedCards);
+      return processedCards;
     } catch (error) {
       console.error('Erreur lors de la récupération des cartes racines:', error);
       return [];
