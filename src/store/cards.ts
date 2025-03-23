@@ -117,16 +117,34 @@ export const useCardsStore = create<CardsState>((set, get) => ({
   
   getFilteredCards: () => {
     const { cards, selectedParentId } = get();
+    console.log('getFilteredCards - inputs:', { selectedParentId, totalCards: cards.length });
     
     if (!selectedParentId) {
-      // Afficher les cartes racines (parent_id = null)
-      return cards.filter(card => !card.parent_id);
+      // Afficher les cartes racines (parent_id = '00000' ou null)
+      const rootCards = cards.filter(card => 
+        card.parent_id === '00000' || // Cartes du quiz environnemental
+        card.id === '00200' || // Carte principale Notre Tour
+        !card.parent_id // Autres cartes racines
+      );
+      
+      console.log('Root cards found:', {
+        count: rootCards.length,
+        ids: rootCards.map(c => c.id),
+        titles: rootCards.map(c => c.title)
+      });
+      
+      return rootCards;
     }
 
     // Afficher les cartes enfants du parent sélectionné
     const filteredCards = cards.filter(card => card.parent_id === selectedParentId);
     
-    console.log('Getting filtered cards:', filteredCards);
+    console.log('Child cards found for parent', selectedParentId, ':', {
+      count: filteredCards.length,
+      ids: filteredCards.map(c => c.id),
+      titles: filteredCards.map(c => c.title)
+    });
+    
     return filteredCards;
   },
 

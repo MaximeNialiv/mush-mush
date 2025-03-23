@@ -110,6 +110,8 @@ class SupabaseService {
   async getAllCards(): Promise<Card[]> {
     try {
       console.log('Récupération des cartes depuis Supabase...');
+      console.log('URL Supabase:', import.meta.env.VITE_SUPABASE_URL);
+      console.log('Clé API définie:', !!import.meta.env.VITE_SUPABASE_ANON_KEY);
       
       // Récupérer toutes les cartes
       const { data: cards, error: cardsError } = await supabase
@@ -117,10 +119,7 @@ class SupabaseService {
         .select('*');
       
       console.log('Cartes récupérées:', cards?.length || 0);
-      if (cards && cards.length > 0) {
-        console.log('Exemple de carte brute:', cards[0]);
-      }
-        
+      
       if (cardsError) {
         console.error('Erreur lors de la récupération des cartes:', cardsError);
         throw cardsError;
@@ -130,6 +129,27 @@ class SupabaseService {
         console.log('Aucune carte trouvée');
         return [];
       }
+
+      // Analyser la structure des cartes
+      const rootCards = cards.filter(card => card.parent_id === '00000' || !card.parent_id);
+      console.log('Cartes racines trouvées:', rootCards.length);
+      
+      // Afficher quelques exemples de cartes racines
+      if (rootCards.length > 0) {
+        console.log('Exemples de cartes racines:', rootCards.slice(0, 3).map(c => ({
+          id: c.id,
+          title: c.title,
+          parent_id: c.parent_id
+        })));
+      }
+      
+      // Afficher les cartes du quiz environnemental
+      const quizCards = cards.filter(card => card.parent_id === '00000');
+      console.log('Cartes du quiz environnemental:', quizCards.length);
+      
+      // Afficher les cartes Notre Tour
+      const notreTourCards = cards.filter(card => card.id === '00200' || card.parent_id === '00200');
+      console.log('Cartes Notre Tour:', notreTourCards.length);
 
       // Convertir les contenus JSON en objets
       const processedCards = cards.map(card => {
@@ -164,14 +184,11 @@ class SupabaseService {
       });
 
       console.log('Traitement des cartes terminé');
-      if (processedCards.length > 0) {
-        console.log('Exemple de carte traitée:', processedCards[0]);
-      }
       
       return processedCards;
     } catch (error) {
       console.error('Erreur lors de la récupération des cartes:', error);
-      return [];
+      throw error; // Propager l'erreur pour un meilleur débogage
     }
   }
 
