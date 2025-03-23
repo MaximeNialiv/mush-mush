@@ -1,58 +1,14 @@
-import { useEffect, useCallback, memo } from 'react';
+import { useEffect, useCallback, memo, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Navigation } from '@/components/layout/Navigation';
 import { WorkshopCard } from '@/components/cards/WorkshopCard';
-import { QuizCard } from '@/components/cards/QuizCard';
-import { MediaCard } from '@/components/cards/MediaCard';
+import { ContentViewer } from '@/components/cards/ContentViewer';
 import { useCardsStore } from '@/store/cards';
 import { Card } from '@/types/card';
-import { ChevronRight } from 'lucide-react';
-
-const CardComponent = memo(({ card }: { card: Card }) => {
-  const selectParent = useCardsStore(state => state.selectParent);
-
-  const handleParentClick = useCallback(() => {
-    if (card.type === 'parent') {
-      selectParent(card.id);
-    }
-  }, [card.id, card.type, selectParent]);
-
-  switch (card.type) {
-    case 'parent':
-      return (
-        <WorkshopCard
-          title={card.title}
-          description={card.description}
-          image="https://picsum.photos/300/200"
-          points={{knowledge: {current: 0, total: 10}, behavior: {current: 0, total: 5}, skills: {current: 0, total: 8}}}
-          isParent={true}
-          onClick={handleParentClick}
-        />
-      );
-    
-    case 'qcm':
-      return (
-        <QuizCard
-          number="1"
-          question={card.question}
-          options={card.options.map(opt => ({ id: opt.id, text: opt.text, isCorrect: opt.isCorrect }))}
-          points={{knowledge: {current: 0, total: 10}, behavior: {current: 0, total: 5}, skills: {current: 0, total: 8}}}
-        />
-      );
-    
-    case 'media':
-      return (
-        <MediaCard
-          title={card.title}
-          description={card.description}
-          mediaType={card.mediaType}
-          mediaUrl={card.mediaUrl}
-          points={{knowledge: {current: 0, total: 10}, behavior: {current: 0, total: 5}, skills: {current: 0, total: 8}}}
-        />
-      );
-  }
-});
+import { ChevronRight, ArrowLeft } from 'lucide-react';
 
 const Index = () => {
+  const [selectedContent, setSelectedContent] = useState<Card | null>(null);
   const { 
     selectParent, 
     getParentCard, 
@@ -61,33 +17,101 @@ const Index = () => {
     getTotalPoints,
     fetchCards,
     isLoading,
-    error
+    error,
+    cards,
+    navigationHistory
   } = useCardsStore();
-  
-  const parentCard = getParentCard();
-  const filteredCards = getFilteredCards();
-  const totalPoints = getTotalPoints();
 
-  const handlePopState = useCallback(() => {
-    handleBackNavigation();
-  }, [handleBackNavigation]);
-
+  // Charger les cartes au montage du composant
   useEffect(() => {
+    console.log('Index component mounted, fetching cards...');
     fetchCards();
   }, [fetchCards]);
-
+  
+  // Effet pour logger l'état des cartes après chargement
   useEffect(() => {
+    console.log('Cards state updated:', {
+      totalCards: cards.length,
+      isLoading,
+      error,
+      navigationHistory
+    });
+    
+    if (cards.length > 0) {
+      console.log('Sample cards:', cards.slice(0, 3));
+    }
+  }, [cards, isLoading, error, navigationHistory]);
+
+  const handleOpenContent = useCallback((card: Card) => {
+    if (card.content) {
+      setSelectedContent(card);
+    } else {
+      selectParent(card.id);
+    }
+  }, [selectParent]);
+
+
+
+  
+  const parentCard = getParentCard();
+  console.log('Parent card:', parentCard);
+  
+  const filteredCards = getFilteredCards();
+  console.log('Filtered cards:', {
+    count: filteredCards.length,
+    parentId: parentCard?.id || 'null',
+    cards: filteredCards.map(card => ({
+      id: card.id,
+      title: card.title,
+      parent_id: card.parent_id
+    }))
+  });
+  
+  const totalPoints = getTotalPoints();
+  console.log('Total points:', totalPoints);
+
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Charger l'état initial une seule fois au montage
+  useEffect(() => {
+    const loadInitialState = async () => {
+      await fetchCards();
+      
+      // Récupérer le chemin depuis l'URL initiale
+      const pathSegments = location.pathname
+        .split('/')
+        .filter(segment => segment !== '');
+      
+      // Si nous avons un chemin initial, sélectionner le dernier segment
+      if (pathSegments.length > 0) {
+        selectParent(pathSegments[pathSegments.length - 1]);
+      }
+    };
+    
+    loadInitialState();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Gérer le bouton retour du navigateur
+  useEffect(() => {
+    const handlePopState = () => {
+      handleBackNavigation();
+    };
+
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, [handlePopState]);
+  }, [handleBackNavigation]);
 
+  // Mettre à jour l'URL quand la navigation change
   useEffect(() => {
-    if (parentCard) {
-      window.history.pushState({ parentId: parentCard.id }, '', `/${parentCard.id}`);
+    if (navigationHistory.length > 0) {
+      const path = navigationHistory.join('/');
+      navigate(`/${path}`, { replace: true });
     } else {
-      window.history.pushState({ parentId: null }, '', '/');
+      navigate('/', { replace: true });
     }
-  }, [parentCard?.id]);
+  }, [navigationHistory, navigate]);
 
   if (isLoading) {
     return (
@@ -118,13 +142,7 @@ const Index = () => {
 
   return (
     <div 
-      className="min-h-screen bg-cover bg-center bg-fixed bg-[#E0F2F1]"
-      style={{
-        backgroundImage: parentCard 
-          ? `url('${(parentCard as any).image}')`
-          : `url('https://assets.softr-files.com/applications/0529c7f1-880a-41d3-addc-b489b2ba7989/assets/411467df-de8f-47cd-aa64-c8bfef1242db.jpeg')`,
-        backgroundBlendMode: 'overlay',
-      }}
+      className="min-h-screen bg-gradient-to-br from-[#E0F2F1] to-[#B2DFDB]"
     >
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-sm border-b border-black z-50">
@@ -169,10 +187,25 @@ const Index = () => {
                 >
                   Accueil
                 </button>
-                <ChevronRight className="w-4 h-4" />
-                <span className="font-medium text-gray-900">
-                  {parentCard.title}
-                </span>
+                {cards
+                  .filter(card => navigationHistory.includes(card.id))
+                  .map((card, index) => (
+                    <div key={card.id} className="flex items-center gap-2">
+                      <ChevronRight className="w-4 h-4" />
+                      {index === navigationHistory.length - 1 ? (
+                        <span className="font-medium text-gray-900">
+                          {card.title}
+                        </span>
+                      ) : (
+                        <button
+                          onClick={() => selectParent(card.id)}
+                          className="hover:text-gray-900 transition-colors"
+                        >
+                          {card.title}
+                        </button>
+                      )}
+                    </div>
+                  ))}
               </div>
             )}
           </div>
@@ -180,11 +213,136 @@ const Index = () => {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto pt-24 pb-24">
-        <div className="-m-4">
-          {filteredCards.map(card => (
-            <CardComponent key={card.id} card={card} />
-          ))}
+      <main className="fixed inset-x-0 bottom-0 top-24 overflow-x-auto">
+        <div className="h-full flex">
+          {/* Colonnes de navigation */}
+          <div className="flex-1 flex overflow-x-auto">
+            {/* Version mobile : uniquement la colonne active */}
+            <div className="md:hidden h-full w-full">
+              <div 
+                className="w-full h-full border-r border-gray-200 overflow-y-auto p-4 relative"
+                style={{
+                  backgroundImage: navigationHistory.length > 0 
+                    ? `linear-gradient(to bottom, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url(${cards.find(c => c.id === navigationHistory[navigationHistory.length - 1])?.image_url || ''})`
+                    : undefined,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                }}
+              >
+                {navigationHistory.length === 0 ? (
+                  // Afficher la colonne racine
+                  cards
+                    .filter(card => card.parent_id === '00000')
+                    .map((card) => (
+                      <div key={card.id} className="mb-4 last:mb-0">
+                        <WorkshopCard 
+                          card={card}
+                          onOpenContent={handleOpenContent}
+                          isSelected={navigationHistory.includes(card.id)}
+                        />
+                      </div>
+                    ))
+                ) : (
+                  // Afficher la colonne active
+                  <>
+                    {cards
+                      .filter(card => card.parent_id === navigationHistory[navigationHistory.length - 1])
+                      .map((card) => (
+                        <div key={card.id} className="mb-4 last:mb-0">
+                          <WorkshopCard 
+                            card={card}
+                            onOpenContent={handleOpenContent}
+                            isSelected={navigationHistory.includes(card.id)}
+                          />
+                        </div>
+                      ))}
+                    {cards.filter(card => card.parent_id === navigationHistory[navigationHistory.length - 1]).length === 0 && (
+                      <div className="h-full flex flex-col items-center justify-center text-center p-4">
+                        <button
+                          onClick={() => handleBackNavigation()}
+                          className="flex flex-col items-center gap-4 text-gray-500 hover:text-gray-700 transition-colors"
+                        >
+                          <ArrowLeft className="w-8 h-8" />
+                          <p>Cette colonne est vide.<br />Cliquez ici pour revenir à la colonne précédente</p>
+                        </button>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Version desktop : afficher uniquement le chemin direct */}
+            <div className="hidden md:flex h-full transition-transform duration-300 ease-in-out">
+              {/* Colonne racine */}
+              <div 
+                className="w-[350px] min-w-[350px] border-r border-gray-200 overflow-y-auto p-4 relative"
+                style={{
+                  backgroundImage: `linear-gradient(to bottom, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url(${cards.find(c => c.parent_id === '00000')?.image_url || ''})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                }}
+              >
+                {cards
+                  .filter(card => card.parent_id === '00000')
+                  .map((card) => (
+                    <div key={card.id} className="mb-4 last:mb-0">
+                      <WorkshopCard 
+                        card={card}
+                        onOpenContent={handleOpenContent}
+                        isSelected={navigationHistory.includes(card.id)}
+                      />
+                    </div>
+                  ))}
+              </div>
+
+              {/* Colonnes du chemin direct */}
+              {navigationHistory.map((id, index) => {
+                const levelCards = cards.filter(card => card.parent_id === id);
+                return (
+                  <div 
+                    key={id} 
+                    className="w-[350px] min-w-[350px] border-r border-gray-200 overflow-y-auto p-4 animate-slideIn relative"
+                    style={{
+                      animationDelay: `${index * 0.1}s`,
+                      backgroundImage: `linear-gradient(to bottom, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url(${cards.find(c => c.id === id)?.image_url || ''})`,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                    }}
+                  >
+                    {levelCards.length > 0 ? (
+                      levelCards.map((card) => (
+                        <div key={card.id} className="mb-4 last:mb-0">
+                          <WorkshopCard 
+                            card={card}
+                            onOpenContent={handleOpenContent}
+                            isSelected={navigationHistory.includes(card.id)}
+                          />
+                        </div>
+                      ))
+                    ) : (
+                      <div className="h-full flex flex-col items-center justify-center text-center p-4">
+                        <button
+                          onClick={() => handleBackNavigation()}
+                          className="flex flex-col items-center gap-4 text-gray-500 hover:text-gray-700 transition-colors"
+                        >
+                          <ArrowLeft className="w-8 h-8" />
+                          <p>Cette colonne est vide.<br />Cliquez ici pour revenir à la colonne précédente</p>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Colonne de contenu */}
+          {selectedContent && (
+            <div className="w-[500px] min-w-[500px] border-l border-gray-200 bg-white">
+              <ContentViewer card={selectedContent} onClose={() => setSelectedContent(null)} />
+            </div>
+          )}
         </div>
       </main>
 
