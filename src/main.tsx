@@ -3,15 +3,18 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 // import TestApp from './test-app';
-// import TestSimple from './test-simple';
+import TestSimple from './test-simple';
+import TestCORS from './test-cors';
 import './index.css';
 
 console.log('Démarrage de l\'application...');
 
 // Afficher les variables d'environnement
 console.log('Variables d\'environnement:');
-console.log('VITE_SUPABASE_URL:', import.meta.env.VITE_SUPABASE_URL);
+console.log('VITE_SUPABASE_URL:', import.meta.env.VITE_SUPABASE_URL || 'Non définie');
 console.log('VITE_SUPABASE_ANON_KEY existe:', !!import.meta.env.VITE_SUPABASE_ANON_KEY);
+console.log('Mode de l\'application:', import.meta.env.MODE);
+console.log('Est en production:', import.meta.env.PROD);
 
 try {
   const rootElement = document.getElementById('root');
@@ -24,7 +27,7 @@ try {
   ReactDOM.createRoot(rootElement).render(
     <React.StrictMode>
       <BrowserRouter>
-        <App />
+        <TestCORS />
       </BrowserRouter>
     </React.StrictMode>,
   );
