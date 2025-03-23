@@ -30,8 +30,8 @@ const calculateTotalPoints = (cards: Card[]) => {
   };
 
   cards.forEach(card => {
-    // Pour l'instant, on attribue des points fixes par type de carte
-    if (card.type === 'quiz') {
+    // Pour l'instant, on attribue des points fixes par type de contenu
+    if (card.content?.type === 'quiz') {
       points.knowledge.total += 2;
       points.behavior.total += 1;
       points.skills.total += 1;
@@ -55,23 +55,51 @@ export const useCardsStore = create<CardsState>((set, get) => ({
   
   selectParent: (parentId) => {
     console.log('Selecting parent:', parentId);
-    const { selectedParentId, navigationHistory } = get();
-    if (parentId !== selectedParentId) {
-      set({
-        selectedParentId: parentId,
-        navigationHistory: parentId 
-          ? [...navigationHistory, parentId]
-          : []
-      });
+    const { cards } = get();
+    
+    if (parentId === null || parentId === '00000') {
+      // Retour à l'accueil
+      set({ selectedParentId: null, navigationHistory: [] });
+      return;
     }
+
+    // Trouver la carte parente
+    const parentCard = cards.find(card => card.id === parentId);
+    if (!parentCard) {
+      console.error('Carte parente non trouvée:', parentId);
+      return;
+    }
+
+    // Construire le chemin direct jusqu'à la racine
+    const path: Id[] = [parentId];
+    let currentCard = parentCard;
+
+    // Remonter jusqu'à la racine
+    while (currentCard.parent_id && currentCard.parent_id !== '00000') {
+      const nextCard = cards.find(card => card.id === currentCard.parent_id);
+      if (!nextCard) {
+        console.error('Carte parente non trouvée dans la chaîne:', currentCard.parent_id);
+        break;
+      }
+      path.unshift(nextCard.id);
+      currentCard = nextCard;
+    }
+
+    console.log('Chemin direct de navigation:', path);
+    set({
+      selectedParentId: parentId,
+      navigationHistory: path
+    });
   },
   
   handleBackNavigation: () => {
     console.log('Handling back navigation');
     const { navigationHistory } = get();
-    const newHistory = [...navigationHistory];
-    newHistory.pop();
+    
+    // Retirer la dernière carte du chemin
+    const newHistory = navigationHistory.slice(0, -1);
     const previousParent = newHistory[newHistory.length - 1] || null;
+
     set({
       selectedParentId: previousParent,
       navigationHistory: newHistory
@@ -91,8 +119,8 @@ export const useCardsStore = create<CardsState>((set, get) => ({
     const { cards, selectedParentId } = get();
     
     if (!selectedParentId) {
-      // Afficher les cartes racines (parent_id = '00000' ou '00100')
-      return cards.filter(card => card.parent_id === '00000' || card.parent_id === '00100');
+      // Afficher les cartes racines (parent_id = null)
+      return cards.filter(card => !card.parent_id);
     }
 
     // Afficher les cartes enfants du parent sélectionné
@@ -112,13 +140,35 @@ export const useCardsStore = create<CardsState>((set, get) => ({
     console.log('Fetching cards from Supabase...');
     set({ isLoading: true, error: null });
     try {
+      // Log des variables d'environnement
+      console.log('Variables d\'environnement:');
+      console.log('MODE:', import.meta.env.MODE);
+      console.log('VITE_SUPABASE_URL:', import.meta.env.VITE_SUPABASE_URL || 'Non définie');
+      console.log('VITE_SUPABASE_ANON_KEY existe:', !!import.meta.env.VITE_SUPABASE_ANON_KEY);
+      
       const cards = await supabaseService.getAllCards();
       console.log('Cards fetched successfully:', cards);
-      set({ cards, isLoading: false });
-    } catch (error) {
+      
+      if (!cards || cards.length === 0) {
+        console.warn('Aucune carte n\'a été récupérée');
+      }
+      
+      set({ cards: cards || [], isLoading: false });
+
+      // Vérifier les cartes filtrées
+      const filteredCards = (cards || []).filter(card => card.parent_id === '00000' || card.id === '00200');
+      console.log('Filtered root cards:', filteredCards);
+    } catch (error: any) {
       console.error('Error fetching cards from Supabase:', error);
+      console.error('Error details:', {
+        message: error.message,
+        name: error.name,
+        stack: error.stack,
+        code: error.code,
+        details: error.details
+      });
       set({ 
-        error: 'Une erreur est survenue lors du chargement des cartes',
+        error: `Une erreur est survenue lors du chargement des cartes: ${error.message}`,
         isLoading: false 
       });
     }
