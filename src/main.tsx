@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 // import TestApp from './test-app';
 import TestSimple from './test-simple';
+import TestCORS from './test-cors';
 import './index.css';
 
 console.log('Démarrage de l\'application...');
@@ -26,7 +27,7 @@ try {
   ReactDOM.createRoot(rootElement).render(
     <React.StrictMode>
       <BrowserRouter>
-        <TestSimple />
+        <TestCORS />
       </BrowserRouter>
     </React.StrictMode>,
   );
