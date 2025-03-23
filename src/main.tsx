@@ -27,7 +27,7 @@ try {
   ReactDOM.createRoot(rootElement).render(
     <React.StrictMode>
       <BrowserRouter>
-        <TestCORS />
+        <App />
       </BrowserRouter>
     </React.StrictMode>,
   );
