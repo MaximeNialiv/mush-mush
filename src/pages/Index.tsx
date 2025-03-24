@@ -26,7 +26,17 @@ const Index = () => {
   useEffect(() => {
     console.log('Index component mounted, fetching cards...');
     fetchCards();
-  }, [fetchCards]);
+    
+    // Forcer un rechargement des cartes après 2 secondes si nécessaire
+    const timer = setTimeout(() => {
+      if (cards.length === 0 && !isLoading && !error) {
+        console.log('Aucune carte chargée après le délai, rechargement...');
+        fetchCards();
+      }
+    }, 2000);
+    
+    return () => clearTimeout(timer);
+  }, [fetchCards, cards.length, isLoading, error]);
   
   // Effet pour logger l'état des cartes après chargement
   useEffect(() => {
@@ -40,7 +50,14 @@ const Index = () => {
     if (cards.length > 0) {
       console.log('Sample cards:', cards.slice(0, 3));
     }
-  }, [cards, isLoading, error, navigationHistory]);
+    
+    // Si aucune carte n'est sélectionnée et que nous avons des cartes, sélectionnons la racine
+    if (cards.length > 0 && !selectedContent && navigationHistory.length === 0) {
+      console.log('Aucune carte sélectionnée, affichage des cartes racines');
+      // Réinitialiser la sélection pour afficher les cartes racines
+      selectParent(null);
+    }
+  }, [cards, isLoading, error, navigationHistory, selectedContent, selectParent]);
 
   const handleOpenContent = useCallback((card: Card) => {
     if (card.content) {
@@ -66,6 +83,14 @@ const Index = () => {
       parent_id: card.parent_id
     }))
   });
+  
+  // S'assurer que nous avons bien des cartes filtrées
+  useEffect(() => {
+    if (filteredCards.length === 0 && cards.length > 0 && !isLoading) {
+      console.log('Aucune carte filtrée trouvée, retour à la racine');
+      selectParent(null);
+    }
+  }, [filteredCards.length, cards.length, isLoading, selectParent]);
   
   const totalPoints = getTotalPoints();
   console.log('Total points:', totalPoints);
@@ -212,6 +237,27 @@ const Index = () => {
         </div>
       </header>
 
+      {/* Débogage - Visible uniquement en développement */}
+      {process.env.NODE_ENV !== 'production' && (
+        <div className="fixed bottom-0 right-0 bg-white/90 p-2 text-xs border border-gray-300 m-2 rounded z-50 max-w-xs overflow-auto max-h-48">
+          <p><strong>Debug:</strong> {cards.length} cartes</p>
+          <p><strong>Parent:</strong> {parentCard?.id || 'racine'}</p>
+          <p><strong>Historique:</strong> {navigationHistory.join(' > ')}</p>
+          <p><strong>Filtrées:</strong> {filteredCards?.length || 0} cartes</p>
+          <button 
+            onClick={() => {
+              console.log('Toutes les cartes:', cards);
+              console.log('Cartes filtrées:', filteredCards);
+              console.log('Historique:', navigationHistory);
+              console.log('Parent:', parentCard);
+            }}
+            className="bg-gray-200 px-1 py-0.5 rounded mt-1 hover:bg-gray-300"
+          >
+            Log détails
+          </button>
+        </div>
+      )}
+      
       {/* Main Content */}
       <main className="fixed inset-x-0 bottom-0 top-24 overflow-x-auto">
         <div className="h-full flex">
