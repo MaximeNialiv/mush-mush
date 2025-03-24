@@ -121,11 +121,22 @@ export const useCardsStore = create<CardsState>((set, get) => ({
     
     if (!selectedParentId) {
       // Afficher les cartes racines (parent_id = '00000' ou null)
-      const rootCards = cards.filter(card => 
-        card.parent_id === '00000' || // Cartes du quiz environnemental
-        card.id === '00200' || // Carte principale Notre Tour
-        !card.parent_id // Autres cartes racines
-      );
+      const rootCards = cards.filter(card => {
+        // Vérifier si la carte est une racine
+        const isRoot = 
+          card.parent_id === '00000' || // Cartes du quiz environnemental
+          card.id === '00200' || // Carte principale Notre Tour
+          !card.parent_id; // Autres cartes racines
+        
+        // Vérifier aussi le champ parent_ids (au pluriel) si présent
+        const hasParentIds = card.parent_ids && typeof card.parent_ids === 'string';
+        const isRootByParentIds = hasParentIds && (
+          card.parent_ids === '00000' || 
+          card.parent_ids.includes('00000')
+        );
+        
+        return isRoot || isRootByParentIds;
+      });
       
       console.log('Root cards found:', {
         count: rootCards.length,
@@ -137,7 +148,19 @@ export const useCardsStore = create<CardsState>((set, get) => ({
     }
 
     // Afficher les cartes enfants du parent sélectionné
-    const filteredCards = cards.filter(card => card.parent_id === selectedParentId);
+    const filteredCards = cards.filter(card => {
+      // Vérifier le champ parent_id (au singulier)
+      const matchesSingular = card.parent_id === selectedParentId;
+      
+      // Vérifier aussi le champ parent_ids (au pluriel) si présent
+      const hasParentIds = card.parent_ids && typeof card.parent_ids === 'string';
+      const matchesPlural = hasParentIds && (
+        card.parent_ids === selectedParentId || 
+        card.parent_ids.includes(selectedParentId)
+      );
+      
+      return matchesSingular || matchesPlural;
+    });
     
     console.log('Child cards found for parent', selectedParentId, ':', {
       count: filteredCards.length,
