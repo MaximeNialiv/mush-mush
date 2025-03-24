@@ -113,10 +113,11 @@ class SupabaseService {
       console.log('URL Supabase:', import.meta.env.VITE_SUPABASE_URL);
       console.log('Clé API définie:', !!import.meta.env.VITE_SUPABASE_ANON_KEY);
       
-      // Récupérer toutes les cartes
+      // Récupérer toutes les cartes avec un délai de 10 secondes
       const { data: cards, error: cardsError } = await supabase
         .from('cards')
-        .select('*');
+        .select('*')
+        .timeout(10000);
       
       console.log('Cartes récupérées:', cards?.length || 0);
       
@@ -129,6 +130,10 @@ class SupabaseService {
         console.log('Aucune carte trouvée');
         return [];
       }
+      
+      // Vérifier la structure des cartes reçues
+      console.log('Structure de la première carte:', cards[0] ? Object.keys(cards[0]) : 'Aucune carte');
+      console.log('Exemple de carte:', cards[0]);
 
       // Analyser la structure des cartes
       const rootCards = cards.filter(card => card.parent_id === '00000' || !card.parent_id);
